@@ -1,0 +1,13 @@
+## YAML Template.
+---
+app:
+  brand: 'Backtest de portefeuille'
+  title: 'backtest'
+  search: true
+  menu:
+    Home: /
+    Portfolio: /portfolio
+    About:
+      About Us: /about
+      About You: /
+ 
