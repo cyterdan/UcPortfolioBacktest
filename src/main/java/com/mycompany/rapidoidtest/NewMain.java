@@ -14,6 +14,7 @@ import com.opencsv.CSVReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Date;
+
 /**
  *
  * @author cytermann
@@ -28,8 +29,12 @@ public class NewMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException {
-       
-        
+
+        String port = System.getenv("PORT");
+        if (port != null) {
+            On.port(Integer.valueOf(port));
+        }
+
         On.page("/portfolio").mvc(() -> {
             return U.map("count", 12);
         });
@@ -42,13 +47,11 @@ public class NewMain {
             if (!validatePortfolio(porte)) {
                 response.put(STATUS, "ERROR");
                 response.put(MESSAGE, "la somme des parts doit être 100%");
-            }
-            
-            else{
-                
+            } else {
+
                 response.put(STATUS, STATUS);
                 response.put(MESSAGE, MESSAGE);
-                
+
             }
 
             return response;
