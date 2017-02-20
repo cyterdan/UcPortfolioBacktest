@@ -201,7 +201,7 @@ var countryIsoAndNameList = {
     
     
     $('#goButton').button(
-                ).click(function() {
+                ).unbind('click').click(function() {
         var send=[];
         var data = grid.getData();
         for(var i=0;i<data.length;i++){
@@ -215,7 +215,14 @@ var countryIsoAndNameList = {
             url: "/backtest",
             method:"post",
             data  :  {data:send,size:send.length},
-            context: document.body
+            context: document.body,
+            success: function (data, textStatus, jqXHR) {
+                        console.log(data);
+                        if(data.status === "ERROR") {
+                            alert(data.message);
+                        }
+                                
+                    }
           }).done(function() {
             $( this ).addClass( "done" );
           });
