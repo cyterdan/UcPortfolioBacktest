@@ -31,13 +31,7 @@ public class NewMain {
     private static final String MESSAGE = "message";
 
     
-    public static double computeStandardDeviation(Number... collection) {
-    return Arrays.stream(collection)
-                 .map(Number::doubleValue)
-                 .collect(DoubleStatistics.collector())
-                 .getStandardDeviation();
-}
-    
+  
     
     /**
      * @param args the command line arguments
