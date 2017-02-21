@@ -77,7 +77,8 @@ public class NewMain {
             On.port(Integer.valueOf(port));
         }
 
-        On.page("/portfolio").mvc((req) -> {
+        On.page("/portfolio").mvc((req, resp) -> {
+
             if (req.params().containsKey(PRESET)) {
                 System.out.println(req.param(PRESET));
                 Object deserialize = deserialize(req.param(PRESET), MapType.class);
@@ -89,7 +90,7 @@ public class NewMain {
         });
 
         On.post("/backtest").json((Req req) -> {
-            Map<String, Integer> porte = extractPortfolio(req.posted());
+            Map<String, Double> porte = extractPortfolio(req.posted());
 
             Map<String, Object> response = new HashMap<>();
 
@@ -104,13 +105,12 @@ public class NewMain {
                 Map<String, SortedMap<LocalDate, Double>> data = getDataForIsins(isinSet);
 
                 Set<String> referenceIsin = new HashSet<>();
-                
-                String refIsin= "FR0010315770";
+
+                String refIsin = "FR0010315770";
                 referenceIsin.add(refIsin);
-                
-                SortedMap<LocalDate,Double> referenceData = getDataForIsins(referenceIsin).get(refIsin);
-                
-                
+
+                SortedMap<LocalDate, Double> referenceData = getDataForIsins(referenceIsin).get(refIsin);
+
                 LocalDate minDate = isinSet.stream()
                         .map(isin -> data.get(isin).firstKey())
                         .max((o1, o2) -> o1.compareTo(o2)).get();
@@ -129,7 +129,7 @@ public class NewMain {
                 Map<String, Map<LocalDate, Double>> sim = new HashMap<>();
                 for (String isin : isinSet) {
                     sim.put(isin, new HashMap<>());
-                    sim.get(isin).put(minDate, porte.get(isin).doubleValue() / 100);
+                    sim.get(isin).put(minDate, porte.get(isin).doubleValue());
                 }
 
                 while (maxDate.isAfter(d)) {
@@ -186,15 +186,14 @@ public class NewMain {
                 double stdGlobal = stdevs.stream().mapToDouble(a -> a).sum() / stdevs.size();
                 System.out.println("perf globale : " + perfGlobal + " std : " + stdGlobal);
                 List<List> history = formatAsJsArray(K);
-                
+
                 //retirer l'historique inutile de la réference
                 referenceData = referenceData.subMap(minDate, maxDate);
                 List<List> reference = formatAsJsArray(referenceData);
 
-                
                 response.put("history", history);
-                response.put("reference",reference);
-                
+                response.put("reference", reference);
+
                 BigDecimal formattedPerf = BigDecimal.valueOf(perfGlobal);
                 formattedPerf.setScale(2, RoundingMode.FLOOR);
                 response.put("perf", formattedPerf);
@@ -221,8 +220,8 @@ public class NewMain {
             list.add(entry.getKey().getYear());
             list.add(entry.getKey().getMonthValue());
             list.add(entry.getKey().getDayOfMonth());
-            
-            list.add(entry.getValue()/normal);
+
+            list.add(entry.getValue() / normal);
             history.add(list);
         }
         return history;
@@ -264,8 +263,8 @@ public class NewMain {
         return new Gson().fromJson(new String(byteaOut.toByteArray()), type);
     }
 
-    private static Map<String, Integer> extractPortfolio(Map<String, Object> posted) {
-        Map<String, Integer> ret = new HashMap<>();
+    private static Map<String, Double> extractPortfolio(Map<String, Object> posted) {
+        Map<String, Double> ret = new HashMap<>();
         Integer size = Integer.valueOf(posted.get("size").toString());
 
         for (int i = 0; i < size; i++) {
@@ -273,28 +272,29 @@ public class NewMain {
             String partKey = String.format("data[%d][part]", i);
             if (posted.containsKey(ucKey) && posted.containsKey(partKey)) {
                 String isin = posted.get(ucKey).toString();
-                Integer p = Integer.valueOf(posted.get(partKey).toString());
-                if (p > 0 && !isin.isEmpty()) {
-                    ret.put(isin, p);
+                if (!posted.get(partKey).toString().isEmpty()) {
+                    Double p = Double.valueOf(posted.get(partKey).toString());
+                    if (p > 0 && !isin.isEmpty()) {
+                        ret.put(isin, p);
+                    }
                 }
             }
         }
         return ret;
     }
 
-    private static boolean validatePortfolio(Map<String, Integer> porte) {
-        return porte.values().stream().mapToInt(Integer::intValue).sum() == 100;
+    private static boolean validatePortfolio(Map<String, Double> porte) {
+        return Math.abs(porte.values().stream().mapToDouble(Double::doubleValue).sum() - 1.00) < 0.001;
     }
 
-    private static Map<String, SortedMap<LocalDate, Double>> 
-        getDataForIsins(Set<String> isinSet) throws SQLException {
+    private static Map<String, SortedMap<LocalDate, Double>>
+            getDataForIsins(Set<String> isinSet) throws SQLException {
         Connection conn = null;
         Map<String, SortedMap<LocalDate, Double>> data = new HashMap<>();
         try {
             conn = PGPoolingDataSource.getDataSource(DATASOURCE_NAME).getConnection();
             String isins = String.join(",", isinSet);
             ResultSet rs = conn.createStatement().executeQuery(String.format("select date,%s  from funds", isins));
-            
 
             while (rs.next()) {
                 LocalDate date = rs.getDate("date").toLocalDate();
@@ -320,7 +320,7 @@ public class NewMain {
             }
         }
         return data;
-        
-    }
 
     }
+
+}
