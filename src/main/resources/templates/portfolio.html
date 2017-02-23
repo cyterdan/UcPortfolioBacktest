@@ -1,4 +1,5 @@
-
+<div id="permalink" class="alert-info" style="text-align: center" ></div>
+<br />
 <p>
     configurer un portefeuille :
 </p>
@@ -15,14 +16,45 @@
         
     </div>
 <br />
+<script>
+    $(document).ready(function(){
+        if('${preset}' !=='N/A'){
+        var raw=atob('${preset}');
+        //console.log(raw);
+        var preset = $.parseJSON(raw)
+       // console.log(data[0][0]);
+       
+        if(hot.getData()[0][0] == undefined){
+        extended=[]
+              for(var j=0;j<20;j++){
+                  if(j<preset.length){
+                    extended.push(preset[j]);
+                  }
+                  else{
+                      extended.push([]);
+                  }
+                  
+                 }
+            console.log(extended);
+            hot.loadData(extended);
+
+
+             hot.render();
+             //console.log(data);
+        document.getElementById('goButton').click();
+
+        }
+    }
+    });
+</script>
 <div style="float: none">
     <br/>
     <br />
     <div id="goButton" class="bbtn" >Backtest</div>
-  
-    <div id="history" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    <div id="results">
+        <div id="perf" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:left" ></div>
+        <div id="std" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:right" ></div>
 
+        <div id="history" style="min-width: 310px; height: 400px; margin: 0 auto;float:none"></div>
+    </div>
 </div>
-
-
-@{oki}

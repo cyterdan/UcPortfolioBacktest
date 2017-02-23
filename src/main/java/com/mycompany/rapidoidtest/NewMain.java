@@ -1,7 +1,8 @@
 package com.mycompany.rapidoidtest;
 
-import com.fasterxml.jackson.databind.type.MapType;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,9 +15,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,17 +22,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.json.JSONObject;
 import org.postgresql.ds.PGPoolingDataSource;
 import org.rapidoid.http.Req;
 import org.rapidoid.setup.On;
 import org.rapidoid.u.U;
+import org.rapidoid.util.Msc;
 
 /**
  *
@@ -81,9 +81,17 @@ public class NewMain {
 
             if (req.params().containsKey(PRESET)) {
                 System.out.println(req.param(PRESET));
-                Object deserialize = deserialize(req.param(PRESET), MapType.class);
-
-                return U.map("test", 12);
+                
+                Map<String, Double> deserialize = deserialize(req.param(PRESET), new TypeToken<Map<String,Double>>(){}.getType());
+                List<List> list= new ArrayList<>();
+                for(Entry<String,Double> entry : deserialize.entrySet()){
+                    List<String> subList = new ArrayList<>();
+                    subList.add("'"+entry.getKey()+"'");
+                    subList.add(entry.getValue().toString());
+                list.add(subList);
+                }
+                
+                return U.map("preset",Base64.encodeBase64String(list.toString().replace("'", "\"").getBytes()));
             } else {
                 return U.map("count", 12);
             }
@@ -171,7 +179,7 @@ public class NewMain {
                 SortedMap<Integer, Double> perfAnnual = new TreeMap<>();
                 for (int year = startYear; year <= endYear; year++) {
                     SortedMap<LocalDate, Double> yearK = K.subMap(LocalDate.of(year, Month.JANUARY, 1), LocalDate.of(year, Month.DECEMBER, 31));
-                    double perf = (yearK.get(yearK.lastKey()) - yearK.get(yearK.firstKey())) / yearK.get(yearK.lastKey());
+                    double perf = (yearK.get(yearK.lastKey()) - yearK.get(yearK.firstKey())) / yearK.get(yearK.firstKey());
 
                     double[] values = yearK.values().stream().mapToDouble(x -> x).toArray();
 
@@ -179,11 +187,12 @@ public class NewMain {
                     double std = stdev.evaluate(values);
                     stdevs.add(std);
                     System.out.println(year + " [ perf : " + perf * 100 + " std :" + std);
-                    perfAnnual.put(year, std);
+                    perfAnnual.put(year, perf);
                 }
 
-                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey()) * 100;
-                double stdGlobal = stdevs.stream().mapToDouble(a -> a).sum() / stdevs.size();
+                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey()) * 100 / (endYear-startYear+1);
+                double meanPerf = perfAnnual.values().stream().mapToDouble(a->a).sum()/perfAnnual.size() * 100;
+                double stdGlobal = stdevs.stream().mapToDouble(a -> a).sum() / stdevs.size() * 100;
                 System.out.println("perf globale : " + perfGlobal + " std : " + stdGlobal);
                 List<List> history = formatAsJsArray(K);
 
@@ -194,7 +203,7 @@ public class NewMain {
                 response.put("history", history);
                 response.put("reference", reference);
 
-                BigDecimal formattedPerf = BigDecimal.valueOf(perfGlobal);
+                BigDecimal formattedPerf = BigDecimal.valueOf(meanPerf);
                 formattedPerf.setScale(2, RoundingMode.FLOOR);
                 response.put("perf", formattedPerf);
                 BigDecimal formattedStd = BigDecimal.valueOf(stdGlobal);
@@ -202,8 +211,11 @@ public class NewMain {
                 response.put("std", formattedStd);
 
                 //System.out.println(K);
+                System.out.println("before : "+serialize(porte));
+                System.out.println("after : "+Base64.encodeBase64URLSafeString(serialize(porte).getBytes("utf-8")));
                 response.put(MESSAGE, String.format("Les fonds de ce portefeuil ont des données entre %s et %s ", minDate.toString(), maxDate.toString()));
-
+                response.put("permalink", "/portfolio?preset="+Msc.urlEncode(serialize(porte)));
+               
             }
 
             return response;
