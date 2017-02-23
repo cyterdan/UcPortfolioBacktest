@@ -2,7 +2,6 @@ package com.mycompany.rapidoidtest;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
