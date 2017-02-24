@@ -1,56 +1,38 @@
 <div id="permalink" class="alert-info" style="text-align: center" ></div>
 <br />
-<p>
-    configurer un portefeuille :
-</p>
 
-  <div style="width:50%;">
+
+<div style="width:50%;">
+    <p>
+        Configurer un portefeuille :
+    </p>
     <div id="grid" style="float:left"></div>
-  </div>
-    <div style="float:right">
-        <select id="reference">
-            <option>MSCI World</option>
-            <option>MSCI France</option>
-            <option>ETF CAC40</option>
-        </select>
-        
-    </div>
+</div>
+<div style="position: relative;float:left;left : 50px;">
+    <p >
+        Options : 
+    </p>
+    
+    <label for="reference"> Benchmark : </label>
+    <select id="reference">
+        <option value="FR0010315770">Tracker World</option>
+        <option value="FR0010315770">Fonds euro</option>
+     </select>
+    <br /><br/>
+    <label for="rebalance"> Réquilibrage : </label>
+    <select id="rebalance">
+        <option value="0">Jamais</option>
+        <option value="1">Toutes les deux semaines</option>
+        <option value="2">Dès  qu'une part s'écarte de plus de 2%</option>
+    </select>
+
+
+</div>
 <br />
-<script>
-    $(document).ready(function(){
-        if('${preset}' !=='N/A'){
-        var raw=atob('${preset}');
-        //console.log(raw);
-        var preset = $.parseJSON(raw)
-       // console.log(data[0][0]);
-       
-        if(hot.getData()[0][0] == undefined){
-        extended=[]
-              for(var j=0;j<20;j++){
-                  if(j<preset.length){
-                    extended.push(preset[j]);
-                  }
-                  else{
-                      extended.push([]);
-                  }
-                  
-                 }
-            console.log(extended);
-            hot.loadData(extended);
-
-
-             hot.render();
-             //console.log(data);
-        document.getElementById('goButton').click();
-
-        }
-    }
-    });
-</script>
 <div style="float: none">
     <br/>
     <br />
-    <div id="goButton" class="bbtn" >Backtest</div>
+    <div id="goButton" class="bbtn" >Back-tester!</div>
     <div id="results">
         <div id="perf" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:left" ></div>
         <div id="std" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:right" ></div>
@@ -58,3 +40,34 @@
         <div id="history" style="min-width: 310px; height: 400px; margin: 0 auto;float:none"></div>
     </div>
 </div>
+<script>
+    $(document).ready(function () {
+        if ('${preset}' !== 'N/A') {
+            var raw = atob('${preset}');
+            //console.log(raw);
+            var preset = $.parseJSON(raw)
+            // console.log(data[0][0]);
+
+            if (hot.getData()[0][0] == undefined) {
+                extended = []
+                for (var j = 0; j < 15; j++) {
+                    if (j < preset.length) {
+                        extended.push(preset[j]);
+                    }
+                    else {
+                        extended.push([]);
+                    }
+
+                }
+                //console.log(extended);
+                hot.loadData(extended);
+
+
+                hot.render();
+                //console.log(data);
+                document.getElementById('goButton').click();
+
+            }
+        }
+    });
+</script>

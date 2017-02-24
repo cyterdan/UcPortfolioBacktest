@@ -11,8 +11,11 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.codec.binary.Base64;
@@ -31,6 +35,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.json.JSONObject;
 import org.postgresql.ds.PGPoolingDataSource;
 import org.rapidoid.http.Req;
+import org.rapidoid.job.Jobs;
 import org.rapidoid.setup.On;
 import org.rapidoid.u.U;
 import org.rapidoid.util.Msc;
@@ -80,17 +85,18 @@ public class NewMain {
 
             if (req.params().containsKey(PRESET)) {
                 System.out.println(req.param(PRESET));
-                
-                Map<String, Double> deserialize = deserialize(req.param(PRESET), new TypeToken<Map<String,Double>>(){}.getType());
-                List<List> list= new ArrayList<>();
-                for(Entry<String,Double> entry : deserialize.entrySet()){
+
+                Map<String, Double> deserialize = deserialize(req.param(PRESET), new TypeToken<Map<String, Double>>() {
+                }.getType());
+                List<List> list = new ArrayList<>();
+                for (Entry<String, Double> entry : deserialize.entrySet()) {
                     List<String> subList = new ArrayList<>();
-                    subList.add("'"+entry.getKey()+"'");
+                    subList.add("'" + entry.getKey() + "'");
                     subList.add(entry.getValue().toString());
-                list.add(subList);
+                    list.add(subList);
                 }
-                
-                return U.map("preset",Base64.encodeBase64String(list.toString().replace("'", "\"").getBytes()));
+
+                return U.map("preset", Base64.encodeBase64String(list.toString().replace("'", "\"").getBytes()));
             } else {
                 return U.map("count", 12);
             }
@@ -172,27 +178,50 @@ public class NewMain {
                 }
                 int endYear = maxDate.getYear();
 
-                StandardDeviation stdev = new StandardDeviation();
-
-                List<Double> stdevs = new ArrayList<>();
-                SortedMap<Integer, Double> perfAnnual = new TreeMap<>();
-                for (int year = startYear; year <= endYear; year++) {
-                    SortedMap<LocalDate, Double> yearK = K.subMap(LocalDate.of(year, Month.JANUARY, 1), LocalDate.of(year, Month.DECEMBER, 31));
-                    double perf = (yearK.get(yearK.lastKey()) - yearK.get(yearK.firstKey())) / yearK.get(yearK.firstKey());
-
-                    double[] values = yearK.values().stream().mapToDouble(x -> x).toArray();
-
-                    stdev.clear();
-                    double std = stdev.evaluate(values);
-                    stdevs.add(std);
-                    System.out.println(year + " [ perf : " + perf * 100 + " std :" + std);
-                    perfAnnual.put(year, perf);
+                //si on termine pas en décembre, on termine l'année d'avant
+                if (!K.lastKey().getMonth().equals(Month.DECEMBER)) {
+                    endYear--;
                 }
 
-                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey()) * 100 / (endYear-startYear+1);
-                double meanPerf = perfAnnual.values().stream().mapToDouble(a->a).sum()/perfAnnual.size() * 100;
-                double stdGlobal = stdevs.stream().mapToDouble(a -> a).sum() / stdevs.size() * 100;
-                System.out.println("perf globale : " + perfGlobal + " std : " + stdGlobal);
+                StandardDeviation stdev = new StandardDeviation();
+
+                LocalDate firstMonday = K.firstKey().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+                LocalDate lastMonday = K.lastKey().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                
+                
+                LocalDate day = firstMonday;
+                SortedMap<LocalDate,Double> weeklyReturns = new TreeMap<>();
+                while(day.isBefore(lastMonday)){
+                    SortedMap<LocalDate, Double> Kweek = K.subMap(day,day.plusWeeks(1));
+                    weeklyReturns.put(day, Kweek.get(Kweek.lastKey()) - Kweek.get(Kweek.firstKey())/Kweek.get(Kweek.lastKey()));
+                    day = day.plusWeeks(1);
+                }
+                 double[] values = weeklyReturns.values().stream().mapToDouble(x -> x).toArray();
+
+                
+                    
+                double weeklyVolatility = stdev.evaluate(values)*100;
+
+                /*for (int year = startYear; year <= endYear; year++) {
+                 SortedMap<LocalDate, Double> yearK = K.subMap(LocalDate.of(year, Month.JANUARY, 1), LocalDate.of(year, Month.DECEMBER, 31));
+                 double perf = (yearK.get(yearK.lastKey()) - yearK.get(yearK.firstKey())) / yearK.get(yearK.firstKey());
+
+                 double[] values = yearK.values().stream().mapToDouble(x -> x).toArray();
+
+                 stdev.clear();
+                 double std = stdev.evaluate(values);
+                 stdevs.add(std);
+                 System.out.println(year + " [ perf : " + perf * 100 + " std :" + std);
+                 perfAnnual.put(year, perf);
+                 }*/
+                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey()) ;
+                      
+                long nbDays = K.lastKey().toEpochDay() - K.firstKey().toEpochDay();
+                
+                double perfAnnual = Math.sqrt(52)*Math.pow(1+perfGlobal,365.25/nbDays) -1;
+
+
+                System.out.println("perf globale : " + perfAnnual + " std : " + weeklyVolatility);
                 List<List> history = formatAsJsArray(K);
 
                 //retirer l'historique inutile de la réference
@@ -202,19 +231,22 @@ public class NewMain {
                 response.put("history", history);
                 response.put("reference", reference);
 
-                BigDecimal formattedPerf = BigDecimal.valueOf(meanPerf);
+                BigDecimal formattedPerf = BigDecimal.valueOf(perfAnnual);
                 formattedPerf.setScale(2, RoundingMode.FLOOR);
                 response.put("perf", formattedPerf);
-                BigDecimal formattedStd = BigDecimal.valueOf(stdGlobal);
+                BigDecimal formattedStd = BigDecimal.valueOf(weeklyVolatility);
                 formattedStd.setScale(2, RoundingMode.FLOOR);
                 response.put("std", formattedStd);
 
                 //System.out.println(K);
-                System.out.println("before : "+serialize(porte));
-                System.out.println("after : "+Base64.encodeBase64URLSafeString(serialize(porte).getBytes("utf-8")));
                 response.put(MESSAGE, String.format("Les fonds de ce portefeuil ont des données entre %s et %s ", minDate.toString(), maxDate.toString()));
-                response.put("permalink", "/portfolio?preset="+Msc.urlEncode(serialize(porte)));
-               
+                String permalink = Msc.urlEncode(serialize(porte));
+                response.put("permalink", "/portfolio?preset=" + permalink);
+                
+                //async log
+                Jobs.schedule(()-> logBacktest(permalink,formattedPerf,formattedStd), 1,TimeUnit.NANOSECONDS);
+                
+
             }
 
             return response;
@@ -295,7 +327,9 @@ public class NewMain {
     }
 
     private static boolean validatePortfolio(Map<String, Double> porte) {
-        return Math.abs(porte.values().stream().mapToDouble(Double::doubleValue).sum() - 1.00) < 0.001;
+        double partSum = porte.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        return Math.abs(partSum - 1.00) < 0.001;
     }
 
     private static Map<String, SortedMap<LocalDate, Double>>
@@ -334,4 +368,34 @@ public class NewMain {
 
     }
 
+    private static void logBacktest(String permalink, BigDecimal formattedPerf, BigDecimal formattedStd)  {
+          Connection conn = null;
+        try {
+            conn = PGPoolingDataSource.getDataSource(DATASOURCE_NAME).getConnection();
+            String insertQuery = "INSERT INTO portfolio_log\n" +
+            "    (portfolio, perf,std)\n" +
+            "SELECT '"+permalink+"', "+formattedPerf.toString()+","+formattedStd.toString()+"  \n" +
+            "WHERE\n" +
+            "    NOT EXISTS (\n" +
+            "        SELECT portfolio FROM portfolio_log WHERE portfolio='"+permalink+"'\n" +
+            "    );";
+            conn.createStatement().executeUpdate(insertQuery);
+        }
+        catch(SQLException ex){
+            //dont really care if log doesnt work
+            System.err.println(ex);
+                }
+         finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+
+    
+    }
 }
+
+

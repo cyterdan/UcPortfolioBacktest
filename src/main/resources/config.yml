@@ -2,12 +2,12 @@
 ---
 app:
   brand: 'Backtest de portefeuille'
-  title: 'backtest'
-  search: true
+  title: 'backtester UC'
+  search: false
   menu:
-    Home: /
-    Portfolio: /portfolio
-    About:
-      About Us: /about
-      About You: /
+    Home: /portfolio
+    Assurance Vie: /portfolio
+    Doc:
+      To do...: /help
+
  

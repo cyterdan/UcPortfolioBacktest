@@ -3,13 +3,9 @@ var data = [
     [], [], [],
     [], [], [],
     [], [], [],
-    [], [], [],
-    [], [], [],
-    [], []
+    [], [], []
 ];
-
 var hot = {};
-
 $(document).ready(function () {
 
 
@@ -17,7 +13,6 @@ $(document).ready(function () {
     function customDropdownRenderer(instance, td, row, col, prop, value, cellProperties) {
         var selectedId;
         var optionsList = cellProperties.chosenOptions.data;
-
         var values = (value + "").split(",");
         var value = [];
         for (var index = 0; index < optionsList.length; index++) {
@@ -27,7 +22,6 @@ $(document).ready(function () {
             }
         }
         value = value.join(", ");
-
         Handsontable.TextCell.renderer.apply(this, arguments);
     }
 
@@ -35,20 +29,33 @@ $(document).ready(function () {
 
     var TextEditor = Handsontable.editors.TextEditor;
     var NumericFormattedEditor = TextEditor.prototype.extend();
-
     NumericFormattedEditor.prototype.beginEditing = function (initialValue) {
         var format = this.cellProperties.format;
         var formattedValue = numeral(this.originalValue).format(format);
         TextEditor.prototype.beginEditing.apply(this, [formattedValue]);
         this.TEXTAREA.select();
     };
-
-
     var container = document.getElementById("grid");
     hot = new Handsontable(container, {
         data: data,
         rowHeaders: true,
         colHeaders: ['Fonds', '%'],
+        beforeChange: function (changes, source) {
+            for (var i = 0; i < changes.length; i++) {
+                var cellChange = changes[i];
+                var col = cellChange[1];
+                var newCellValue = cellChange[3];
+                if (col === 1) {
+
+                    var hasExhibitionSuffix = new RegExp("%$").test(newCellValue);
+                    if (!hasExhibitionSuffix) {
+                        newCellValue += "%";
+                    }
+                cellChange[3] = numeral().unformat(newCellValue);
+                }
+
+            }
+        },
         afterChange: function () {
             $('#perf').html("");
             $('#std').html("");
@@ -67,14 +74,9 @@ $(document).ready(function () {
             {type: 'numeric', width: 100, format: '0.00%', editor: NumericFormattedEditor}
         ]
     });
-
-
     //data[0][0] = "FR0010362863";
     //data[0][1] = 1.0;
     hot.render();
-
-
-
     function doGraph(history, reference, perf, std) {
         Highcharts.chart('history', {
             chart: {
@@ -94,7 +96,7 @@ $(document).ready(function () {
             },
             yAxis: {
                 title: {
-                    text: 'Performance (sans unité)'
+                    text: 'Performance (base 1)'
                 }
             },
             legend: {
@@ -137,7 +139,6 @@ $(document).ready(function () {
                     data: reference
                 }]
         });
-
         Highcharts.chart('perf', {
             chart: {
                 type: 'gauge',
@@ -229,20 +230,20 @@ $(document).ready(function () {
                 },
                 plotBands: [{
                         from: 0.0,
-                        to: 4.0,
-                        color: '#55BF3B' // green
+                        to: 2.0,
+                        color: '#DF5353' // red
                     }, {
-                        from: 4.0,
-                        to: 8.0,
+                        from: 2.0,
+                        to: 7.0,
                         color: '#DDDF0D' // yellow
                     }, {
-                        from: 8.0,
-                        to: 35.0,
-                        color: '#DF5353' // red
+                        from: 7.0,
+                        to: 120.0,
+                        color: '#55BF3B' // green
                     }]
             },
             series: [{
-                    name: 'Performance annuelle',
+                    name: 'Performance hebdomadaire',
                     data: [parseFloat(perf.toFixed(2))],
                     tooltip: {
                         valueSuffix: '%'
@@ -250,9 +251,8 @@ $(document).ready(function () {
                     dataLabels: {
                         enabled: true,
                         style: {
-                            fontSize: '40px',
-                            color: '#01DF74'
-
+                            fontSize: '40px'
+                            
                         }
                     }
                 }
@@ -260,8 +260,6 @@ $(document).ready(function () {
             ]
 
         });
-
-
         Highcharts.chart('std', {
             chart: {
                 type: 'gauge',
@@ -271,7 +269,7 @@ $(document).ready(function () {
                 plotShadow: false
             },
             title: {
-                text: 'Volatilité annuelle'
+                text: 'Volatilité hebdomadaire'
             },
             pane: {
                 startAngle: -120,
@@ -366,12 +364,16 @@ $(document).ready(function () {
                     }]
             },
             series: [{
-                    name: 'Volatilité annuelle',
+                    name: 'Volatilité hebdomadaire',
                     data: [parseFloat(std.toFixed(2))],
                     tooltip: {
                         valueSuffix: '%'
-                    }, formatter: function () {
-                        return this.value + "%";
+                    }, dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '40px'
+                            
+                        }
                     }
                 }]
 
@@ -382,9 +384,7 @@ $(document).ready(function () {
     $('#goButton').button(
             ).click(function () {
         var send = [];
-
         data = hot.getData();
-
         for (var i = 0; i < data.length; i++) {
             send.push({'uc': data[i][0], 'part': data[i][1]});
         }
@@ -420,18 +420,20 @@ $(document).ready(function () {
                     h = []
                     for (var i = 0; i < data.history.length; i++) {
                         e = []
-                        e[0] = Date.UTC(data.history[i][0], data.history[i][1], data.history[i][2]);
+                        e[0] = Date.UTC(data.history[i][0], data.history[i][1]-1, data.history[i][2]);
                         e[1] = data.history[i][3];
                         h[i] = e;
                     }
+                    
                     r = []
                     for (var j = 0; j < data.reference.length; j++) {
                         e = []
-                        e[0] = Date.UTC(data.reference[j][0], data.reference[j][1], data.reference[j][2]);
+                        e[0] = Date.UTC(data.reference[j][0], data.reference[j][1]-1, data.reference[j][2]);
                         e[1] = data.reference[j][3];
                         r[j] = e;
                     }
 
+                    //console.log(h);
                     doGraph(h, r, data.perf, data.std);
                     //$('#performance').val(data.perf);
                     //$('#volatilite').val(data.std);
@@ -442,14 +444,11 @@ $(document).ready(function () {
             },
             error: function () {
                 $.unblockUI();
-
                 alert("Oops ! quelque chose est cassé");
             }
 
         }).done(function () {
             $.unblockUI();
         });
-
-
     });
 });
