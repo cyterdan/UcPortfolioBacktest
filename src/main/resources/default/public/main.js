@@ -306,7 +306,7 @@ $(document).ready(function () {
             // the value axis
             yAxis: {
                 min: 0.0,
-                max: 100.0,
+                max: 40.0,
                 minorTickInterval: 'auto',
                 minorTickWidth: 1,
                 minorTickLength: 10,
