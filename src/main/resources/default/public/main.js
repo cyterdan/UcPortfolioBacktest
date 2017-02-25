@@ -306,7 +306,7 @@ $(document).ready(function () {
             // the value axis
             yAxis: {
                 min: 0.0,
-                max: 35.0,
+                max: 100.0,
                 minorTickInterval: 'auto',
                 minorTickWidth: 1,
                 minorTickLength: 10,
@@ -322,25 +322,8 @@ $(document).ready(function () {
                     rotation: 0,
                     overflow: 'none',
                     endOnTick: false,
-                    formatter: function () {
-                        if (this.value == 1.4)
-                            return 'Inflation';
-                        if (this.value == 2.0)
-                            return 'Livret A';
-                        if (this.value == 4.0)
-                            return 'Obligation';
-                        if (this.value == 5.0)
-                            return 'Or';
-                        if (this.value == 6)
-                            return 'SCPI';
-                        if (this.value == 9)
-                            return 'Logements';
-                        if (this.value == 10)
-                            return 'Actions';
-                        if (this.value == 14)
-                            return 'Foncières';
-                        return '';
-                    },
+                  
+                    
                     style: {
                         color: 'black',
                         fontSize: '15px'
@@ -349,17 +332,17 @@ $(document).ready(function () {
                 title: {
                     text: '%'
                 },
-                plotBands: [{
+                plotBands: [ {
                         from: 0.0,
-                        to: 4.0,
+                        to: 5.0,
                         color: '#55BF3B' // green
                     }, {
-                        from: 4.0,
-                        to: 8.0,
+                        from: 5.0,
+                        to: 10.0,
                         color: '#DDDF0D' // yellow
                     }, {
-                        from: 8.0,
-                        to: 20.0,
+                        from: 10.0,
+                        to: 100.0,
                         color: '#DF5353' // red
                     }]
             },
@@ -404,10 +387,12 @@ $(document).ready(function () {
             message: "backtest en cours.."
 
         });
+        
+        
         $.ajax({
             url: "/backtest",
             method: "post",
-            data: {data: send, size: send.length},
+            data: {data: send, size: send.length,rebalanceMode : $("#rebalance").val(),benchmark : $("#reference").val()},
             context: document.body,
             success: function (data, textStatus, jqXHR) {
 
@@ -435,8 +420,6 @@ $(document).ready(function () {
 
                     //console.log(h);
                     doGraph(h, r, data.perf, data.std);
-                    //$('#performance').val(data.perf);
-                    //$('#volatilite').val(data.std);
                     $("#permalink").html("<a href='" + data.permalink + "' > lien permanent vers ce portefeuil </a>");
                 }
 

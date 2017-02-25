@@ -5,7 +5,6 @@ app:
   title: 'backtester UC'
   search: false
   menu:
-    Home: /portfolio
     Assurance Vie: /portfolio
     Doc:
       To do...: /help

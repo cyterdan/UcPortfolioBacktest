@@ -17,6 +17,8 @@ import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.codec.binary.Base64;
@@ -54,6 +57,10 @@ public class NewMain {
 
     private static final String DATASOURCE_NAME = "detna67j3hmevq";
 
+    private static final int REBALANCE_NEVER = 0;
+    private static final int REBALANCE_EVERY2WEEKS = 1;
+    private static final int REBALANCE_FIVEPCTDIFF = 2;
+
     /**
      * @param args the command line arguments
      */
@@ -81,22 +88,22 @@ public class NewMain {
             On.port(Integer.valueOf(port));
         }
 
+        On.page("/").html((req, resp) -> {
+            resp.redirect("/portfolio");
+            return "";
+        });
         On.page("/portfolio").mvc((req, resp) -> {
 
             if (req.params().containsKey(PRESET)) {
                 System.out.println(req.param(PRESET));
 
-                Map<String, Double> deserialize = deserialize(req.param(PRESET), new TypeToken<Map<String, Double>>() {
+                Map<String, Object> deserialized = deserialize(req.param(PRESET), new TypeToken<Map<String, Object>>() {
                 }.getType());
-                List<List> list = new ArrayList<>();
-                for (Entry<String, Double> entry : deserialize.entrySet()) {
-                    List<String> subList = new ArrayList<>();
-                    subList.add("'" + entry.getKey() + "'");
-                    subList.add(entry.getValue().toString());
-                    list.add(subList);
-                }
 
-                return U.map("preset", Base64.encodeBase64String(list.toString().replace("'", "\"").getBytes()));
+                Map<String, Double> porte = (Map<String, Double>) deserialized.get("porte");
+            
+
+                return U.map("preset", Base64.encodeBase64String(new Gson().toJson(deserialized).getBytes()));
             } else {
                 return U.map("count", 12);
             }
@@ -104,7 +111,8 @@ public class NewMain {
 
         On.post("/backtest").json((Req req) -> {
             Map<String, Double> porte = extractPortfolio(req.posted());
-
+            int rebalanceMode = Integer.valueOf(req.posted("rebalanceMode"));
+            String benchmark = req.posted("benchmark");
             Map<String, Object> response = new HashMap<>();
 
             if (!validatePortfolio(porte)) {
@@ -119,7 +127,7 @@ public class NewMain {
 
                 Set<String> referenceIsin = new HashSet<>();
 
-                String refIsin = "FR0010315770";
+                String refIsin = benchmark;
                 referenceIsin.add(refIsin);
 
                 SortedMap<LocalDate, Double> referenceData = getDataForIsins(referenceIsin).get(refIsin);
@@ -150,6 +158,7 @@ public class NewMain {
                     //System.out.println(d);
                     double perfGlobale = 0.0;
                     double totalParts = 0.0;
+                    Boolean isRebalancing = false;
                     for (String isin : isinSet) {
                         //data.get(isin).get(Date.valueOf("2011-08-30").toLocalDate())
                         double rapport = sim.get(isin).get(last);
@@ -157,12 +166,53 @@ public class NewMain {
                                 / data.get(isin).get(last);
                         perfGlobale += perf * rapport;
                         double part = sim.get(isin).get(last) * (1 + perf);
-                        totalParts += part;
                         sim.get(isin).put(d, part);
+                        totalParts += part;
+
                     }
                     for (String isin : isinSet) {
                         double part = sim.get(isin).get(d);
-                        sim.get(isin).put(d, part / totalParts);
+
+                        double nouvellePart = part / totalParts;
+                        /* rebalancing :
+                        
+                         d0 :  0.4 , 0.4 , 0.2 => k
+                         d1 :  0.5, 0.3, 0.2 => k*1.2
+                         ********rebalance******
+                         d2  : 0.4, 0.4,0.2 => k*1.2
+                        
+                         j'ai 100€ répartis en 
+                         20%CAC/80%f€
+                         le cac fait +20%
+                         le f€ fait +5%
+                        
+                         now j'ai 24€ de cac + 84€ de f€ = 108€
+                         en répartition j'ai 22/106 = 22%CAC et 84/108 = 78% f€
+                         je rééquilibre en vendant 108*2%=2 de cac et achetant 2 d'€
+                        
+                         now j'ai 22€ de cac et 86 de f# = 108€ et j'ai les proportions du départ
+                        
+                        
+                         */
+                        //par défaut pas de balancing
+                        sim.get(isin).put(d, nouvellePart);
+                        if (rebalanceMode == REBALANCE_EVERY2WEEKS) {
+                            //are we at n*two weeks distance?
+                            long nbDays = d.toEpochDay() - minDate.toEpochDay();
+                            if (nbDays % 14 == 0) {
+                                sim.get(isin).put(d, porte.get(isin));
+                            }
+
+                        }
+                        if (rebalanceMode == REBALANCE_FIVEPCTDIFF) {
+                            double diff = Math.abs(sim.get(isin).get(d) - porte.get(isin)) / porte.get(isin);
+                            if (isRebalancing || diff > 0.05) {
+                                for (String isin2 : isinSet) {
+                                    sim.get(isin).put(d, porte.get(isin));
+                                }
+                            }
+
+                        }
                     }
 
                     K.put(d, K.get(last) * (1 + perfGlobale));
@@ -171,57 +221,41 @@ public class NewMain {
 
                 }
 
-                int startYear = minDate.getYear();
-                //si on commence pas en janvier, on commence l'année d'après
-                if (!K.firstKey().getMonth().equals(Month.JANUARY)) {
-                    startYear++;
-                }
-                int endYear = maxDate.getYear();
-
-                //si on termine pas en décembre, on termine l'année d'avant
-                if (!K.lastKey().getMonth().equals(Month.DECEMBER)) {
-                    endYear--;
-                }
-
                 StandardDeviation stdev = new StandardDeviation();
 
                 LocalDate firstMonday = K.firstKey().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
-                LocalDate lastMonday = K.lastKey().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-                
-                
+                LocalDate lastFriday = K.lastKey().with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY));
+
                 LocalDate day = firstMonday;
-                SortedMap<LocalDate,Double> weeklyReturns = new TreeMap<>();
-                while(day.isBefore(lastMonday)){
-                    SortedMap<LocalDate, Double> Kweek = K.subMap(day,day.plusWeeks(1));
-                    weeklyReturns.put(day, Kweek.get(Kweek.lastKey()) - Kweek.get(Kweek.firstKey())/Kweek.get(Kweek.lastKey()));
-                    day = day.plusWeeks(1);
-                }
-                 double[] values = weeklyReturns.values().stream().mapToDouble(x -> x).toArray();
-
-                
+                SortedMap<LocalDate, Double> weeklyReturns = new TreeMap<>();
+                while (day.isBefore(lastFriday)) {
+                    SortedMap<LocalDate, Double> Kweek = K.subMap(day, day.with(TemporalAdjusters.next(DayOfWeek.SATURDAY)));
+                    LocalDate thisMonday = Kweek.firstKey();
+                    LocalDate thisSaturday = Kweek.lastKey();
+                    Double vlMonday = Kweek.get(thisMonday);
+                    Double vlSaturday = Kweek.get(thisSaturday);
                     
-                double weeklyVolatility = stdev.evaluate(values)*100;
+                    double ret = (vlSaturday-vlMonday)/vlMonday;
+                    weeklyReturns.put(day, ret);
+                    day = day.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+                }
+                List<Double> values = weeklyReturns.values().stream().collect(Collectors.toList());
+                double[] doubleValues = new double[values.size()];
+                for(int i=0;i<values.size();i++){
+                    doubleValues[i] = values.get(i);
+                }
+                stdev.clear();
+                double weeklyVolatility = stdev.evaluate(doubleValues);
 
-                /*for (int year = startYear; year <= endYear; year++) {
-                 SortedMap<LocalDate, Double> yearK = K.subMap(LocalDate.of(year, Month.JANUARY, 1), LocalDate.of(year, Month.DECEMBER, 31));
-                 double perf = (yearK.get(yearK.lastKey()) - yearK.get(yearK.firstKey())) / yearK.get(yearK.firstKey());
-
-                 double[] values = yearK.values().stream().mapToDouble(x -> x).toArray();
-
-                 stdev.clear();
-                 double std = stdev.evaluate(values);
-                 stdevs.add(std);
-                 System.out.println(year + " [ perf : " + perf * 100 + " std :" + std);
-                 perfAnnual.put(year, perf);
-                 }*/
-                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey()) ;
-                      
-                long nbDays = K.lastKey().toEpochDay() - K.firstKey().toEpochDay();
+                double yearlyVolatility = Math.sqrt(52) * weeklyVolatility *100  ;
                 
-                double perfAnnual = Math.sqrt(52)*Math.pow(1+perfGlobal,365.25/nbDays) -1;
+                double perfGlobal = (K.get(K.lastKey()) - K.get(K.firstKey())) / K.get(K.firstKey());
 
+                long nbDays = K.lastKey().toEpochDay() - K.firstKey().toEpochDay();
 
-                System.out.println("perf globale : " + perfAnnual + " std : " + weeklyVolatility);
+                double perfAnnual =  100*(Math.pow(1 + perfGlobal, 1.0 / ((float)nbDays/365.25))  - 1);
+
+                System.out.println("perf globale : " + perfAnnual + " std : " + yearlyVolatility);
                 List<List> history = formatAsJsArray(K);
 
                 //retirer l'historique inutile de la réference
@@ -234,18 +268,22 @@ public class NewMain {
                 BigDecimal formattedPerf = BigDecimal.valueOf(perfAnnual);
                 formattedPerf.setScale(2, RoundingMode.FLOOR);
                 response.put("perf", formattedPerf);
-                BigDecimal formattedStd = BigDecimal.valueOf(weeklyVolatility);
+                BigDecimal formattedStd = BigDecimal.valueOf(yearlyVolatility);
                 formattedStd.setScale(2, RoundingMode.FLOOR);
                 response.put("std", formattedStd);
 
                 //System.out.println(K);
                 response.put(MESSAGE, String.format("Les fonds de ce portefeuil ont des données entre %s et %s ", minDate.toString(), maxDate.toString()));
-                String permalink = Msc.urlEncode(serialize(porte));
+
+                Map<String, Object> porteData = new HashMap<>();
+                porteData.put("porte", porte);
+                porteData.put("rebalanceMode", rebalanceMode);
+                porteData.put("benchmark", benchmark);
+                String permalink = Msc.urlEncode(serialize(porteData));
                 response.put("permalink", "/portfolio?preset=" + permalink);
-                
+
                 //async log
-                Jobs.schedule(()-> logBacktest(permalink,formattedPerf,formattedStd), 1,TimeUnit.NANOSECONDS);
-                
+                Jobs.schedule(() -> logBacktest(permalink, formattedPerf, formattedStd), 1, TimeUnit.NANOSECONDS);
 
             }
 
@@ -356,6 +394,31 @@ public class NewMain {
                 }
 
             }
+            for (String isin : isinSet) {
+                /* pour les fonds € , on extrapole l'historique */
+                if (isin.startsWith("QU") ) {
+                    
+                    LocalDate first = data.get(isin).firstKey();
+                    LocalDate last = data.get(isin).lastKey();
+                    long nbDays = last.toEpochDay() - first.toEpochDay();
+                    /*double pente = (data.get(isin).get(last) - data.get(isin).get(first)) / data.get(isin).get(first) / nbDays;
+                            */
+                    double totalReturn =  (data.get(isin).get(last) - data.get(isin).get(first)) / data.get(isin).get(first);
+                    double dailyReturn = Math.pow((1 + totalReturn),1.0/nbDays)-1;
+                    LocalDate beginning = LocalDate.of(2000, 1, 1);
+                    while (first.isAfter(beginning)) {
+                        LocalDate before = first.minusDays(1);
+                        data.get(isin).put(before, data.get(isin).get(first) / (1+dailyReturn));
+                        first = before;
+                    }
+                    //normaliser la série
+                    double startValue = data.get(isin).get(beginning);
+                    for (LocalDate d = beginning; d.isBefore(last); d = d.plusDays(1)) {
+                        data.get(isin).put(d, 100*data.get(isin).get(d) / startValue);
+                    }
+                }
+            }
+
         } finally {
             if (conn != null) {
                 try {
@@ -368,24 +431,22 @@ public class NewMain {
 
     }
 
-    private static void logBacktest(String permalink, BigDecimal formattedPerf, BigDecimal formattedStd)  {
-          Connection conn = null;
+    private static void logBacktest(String permalink, BigDecimal formattedPerf, BigDecimal formattedStd) {
+        Connection conn = null;
         try {
             conn = PGPoolingDataSource.getDataSource(DATASOURCE_NAME).getConnection();
-            String insertQuery = "INSERT INTO portfolio_log\n" +
-            "    (portfolio, perf,std)\n" +
-            "SELECT '"+permalink+"', "+formattedPerf.toString()+","+formattedStd.toString()+"  \n" +
-            "WHERE\n" +
-            "    NOT EXISTS (\n" +
-            "        SELECT portfolio FROM portfolio_log WHERE portfolio='"+permalink+"'\n" +
-            "    );";
+            String insertQuery = "INSERT INTO portfolio_log\n"
+                    + "    (portfolio, perf,std)\n"
+                    + "SELECT '" + permalink + "', " + formattedPerf.toString() + "," + formattedStd.toString() + "  \n"
+                    + "WHERE\n"
+                    + "    NOT EXISTS (\n"
+                    + "        SELECT portfolio FROM portfolio_log WHERE portfolio='" + permalink + "'\n"
+                    + "    );";
             conn.createStatement().executeUpdate(insertQuery);
-        }
-        catch(SQLException ex){
+        } catch (SQLException ex) {
             //dont really care if log doesnt work
             System.err.println(ex);
-                }
-         finally {
+        } finally {
             if (conn != null) {
                 try {
                     conn.close();
@@ -394,8 +455,5 @@ public class NewMain {
             }
         }
 
-    
     }
 }
-
-
