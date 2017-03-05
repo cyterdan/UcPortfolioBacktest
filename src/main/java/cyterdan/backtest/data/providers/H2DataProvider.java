@@ -3,10 +3,9 @@ package cyterdan.backtest.data.providers;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.rapidoid.sql.JDBC;
 
 /**
- *
+ * Data provider used for dev and local analysis
  * @author cytermann
  */
 public class H2DataProvider extends AbstractDataProvider implements DataProvider {
@@ -15,7 +14,7 @@ public class H2DataProvider extends AbstractDataProvider implements DataProvider
 
     private static final String dbPath = "/tmp/h2localdb;AUTO_SERVER=TRUE";
     private static final String user = "sa";
-    private static final String password = "sa";
+    private static final String password = "";
 
     public H2DataProvider() {
    
@@ -25,6 +24,10 @@ public class H2DataProvider extends AbstractDataProvider implements DataProvider
     @Override
     public DataSource getDataSource() throws SQLException {
         return connectionPool;
+    }
+    
+    public void logBacktest(String permalink, Double formattedPerf, Double formattedStd) {
+        System.out.println("no log...");
     }
     
     

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import javax.sql.DataSource;
+import model.HistoricalData;
 
 /**
  * Interface for funds historical data provider
@@ -16,9 +17,9 @@ public interface DataProvider {
 
     public DataSource getDataSource() throws SQLException;
 
-    public void logBacktest(String permalink, BigDecimal formattedPerf, BigDecimal formattedStd);
+    public void logBacktest(String permalink, Double formattedPerf, Double formattedStd);
 
-    public Map<String, SortedMap<LocalDate, Double>>
+    public HistoricalData
             getDataForIsins(Set<String> isinSet) throws SQLException;
 
     public Set<String> getIsins() throws SQLException;

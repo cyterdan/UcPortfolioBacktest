@@ -1,19 +1,66 @@
 package model;
 
+import model.allocation.Allocation;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  *
  * @author cytermann
  */
-public class Portfolio extends TreeMap<String, SortedMap<LocalDate, Double>> {
+public class Portfolio {
 
-    public Portfolio filterDates(LocalDate from, LocalDate to) {
-        return (Portfolio) this.entrySet().stream().collect(Collectors.toMap((o) -> o.getKey(), (o) -> o.getValue().subMap(from, to)));
+    private final DateBasedSerie capital;
+
+    private final Allocation allocation;
+
+    public Portfolio(Allocation allocation) {
+        this.allocation = allocation;
+        this.capital = new DateBasedSerie();
+    }
+
+    public DateBasedSerie calculateCapital(LocalDate from, LocalDate to, HistoricalData data) {
+
+        capital.setValue(from, 1.0);
+
+        for (LocalDate d = from.plusDays(1); d.isBefore(to); d = d.plusDays(1)) {
+
+            double perf = 0.0;
+
+            for (String isin : allocation.getIsinsForDate(d)) {
+                Double currentAllocationForIsin = allocation.getPositionForDateAndIsin(d, isin);
+                Double isinDayReturn = data.getFundData(isin).extractReturn(d.minusDays(1), d);
+                perf += currentAllocationForIsin * isinDayReturn;
+                allocation.updatePositionWithReturn(isin, isinDayReturn);
+                switch (allocation.getRebalanceMode()) {
+
+                    case REBALANCE_EVERY2WEEKS:
+                        //are we at n*two weeks distance?
+                        long nbDays = d.toEpochDay() - from.toEpochDay();
+                        if (nbDays % 14 == 0) {
+                            allocation.reset();
+                        }
+                        break;
+                    case REBALANCE_FIVEPCTDIFF:
+                        double diff = allocation.distanceFromInitial(isin);
+                        if (diff > 0.05) {
+                            allocation.reset();
+                        }
+
+                        break;
+
+                    default:
+                        break;
+
+                }
+
+            }
+
+            capital.setValue(d, capital.getValue(d.minusDays(1)) * (1 + perf));
+        }
+
+        return capital;
     }
 
 }

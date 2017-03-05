@@ -1,6 +1,5 @@
 package cyterdan.backtest.data.providers;
 
-import cyterdan.backtest.utils.Data;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -13,9 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.postgresql.ds.PGPoolingDataSource;
+import model.DateBasedSerie;
+import model.HistoricalData;
 
 /**
  *
@@ -24,8 +22,7 @@ import org.postgresql.ds.PGPoolingDataSource;
 public abstract class AbstractDataProvider implements DataProvider {
 
     @Override
-    public void logBacktest(String permalink, BigDecimal formattedPerf, BigDecimal formattedStd) {
-
+    public void logBacktest(String permalink, Double formattedPerf, Double formattedStd) {
 
         Connection conn = null;
         try {
@@ -53,55 +50,18 @@ public abstract class AbstractDataProvider implements DataProvider {
     }
 
     @Override
-    public Map<String, SortedMap<LocalDate, Double>>
+    public HistoricalData
             getDataForIsins(Set<String> isinSet) throws SQLException {
-
+        HistoricalData data = null;
         Connection conn = null;
-        Map<String, SortedMap<LocalDate, Double>> data = new HashMap<>();
         try {
             conn = getDataSource().getConnection();
             String isins = String.join(",", isinSet);
             ResultSet rs = conn.createStatement().executeQuery(String.format("select date,%s  from funds", isins));
 
-            while (rs.next()) {
-                LocalDate date = rs.getDate("date").toLocalDate();
-                for (String isin : isinSet) {
+            data = new HistoricalData(isinSet, rs);
 
-                    Double fundValue = rs.getDouble(isin);
-                    if (fundValue != 0) {
-                        if (!data.containsKey(isin)) {
-                            data.put(isin, new TreeMap<>());
-                        }
-                        data.get(isin).put(date, fundValue);
-                    }
-
-                }
-
-            }
-            for (String isin : isinSet) {
-                /* pour les fonds € , on extrapole l'historique */
-                if (isin.startsWith("QU")) {
-
-                    LocalDate first = data.get(isin).firstKey();
-                    LocalDate last = data.get(isin).lastKey();
-                    long nbDays = last.toEpochDay() - first.toEpochDay();
-                    /*double pente = (data.get(isin).get(last) - data.get(isin).get(first)) / data.get(isin).get(first) / nbDays;
-                     */
-                    double totalReturn = (data.get(isin).get(last) - data.get(isin).get(first)) / data.get(isin).get(first);
-                    double dailyReturn = Math.pow((1 + totalReturn), 1.0 / nbDays) - 1;
-                    LocalDate beginning = LocalDate.of(2000, 1, 1);
-                    while (first.isAfter(beginning)) {
-                        LocalDate before = first.minusDays(1);
-                        data.get(isin).put(before, data.get(isin).get(first) / (1 + dailyReturn));
-                        first = before;
-                    }
-                    //normaliser la série
-                    double startValue = data.get(isin).get(beginning);
-                    for (LocalDate d = beginning; d.isBefore(last); d = d.plusDays(1)) {
-                        data.get(isin).put(d, 100 * data.get(isin).get(d) / startValue);
-                    }
-                }
-            }
+            data.extendsEuroFunds();
 
         } finally {
             if (conn != null) {
