@@ -28,7 +28,7 @@ import org.rapidoid.util.Msc;
 public class BacktestingService {
 
     //postgres data provider for web pages
-    DataProvider dataProvider = new H2DataProvider();
+    DataProvider dataProvider = new PostgresDataProvider();
 
     public BacktestResponse backtest(FixedAllocation allocation, AllocationRebalanceMode rebalanceMode, String benchmark) throws SQLException, IOException {
 
