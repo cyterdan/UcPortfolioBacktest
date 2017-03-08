@@ -1442,6 +1442,7 @@ DATE DATE
 ,_25PCT_ML_euro_1TOTOTO3SSS75PCT_Euro_Stoxx REAL
 ,_75PCT_MSCI_World_PLUS_25PCT_ML_Global REAL
 ,_EONIA_PLUS_2PCT REAL
+,_MOMENTUM_STRATEGIE_ REAL
 ,_MSCI_The_World_Index REAL
 ,_Taux_net_du_Livret_A REAL
 ,_momentum_weekly_best_sharp REAL

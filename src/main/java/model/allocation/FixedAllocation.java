@@ -1,8 +1,8 @@
 package model.allocation;
 
-import com.mchange.v1.util.CollectionUtils;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +24,21 @@ public class FixedAllocation implements Allocation {
         return rebalanceMode;
     }
 
+    @Override
+    public String toString() {
+        String string = "";
+        for(String isin : allocation.keySet()){
+            String formatted = String.valueOf(100*(new BigDecimal(allocation.get(isin)).setScale(2,RoundingMode.FLOOR)).doubleValue())+"%";
+            string+="|"+isin+":"+formatted;
+        }
+        
+        return string;
+
+    }
+
+    
+    
+    
     public static FixedAllocation fromHtmlFormData(Map<String, Object> posted, AllocationRebalanceMode rebalanceMode) {
         FixedAllocation ret = new FixedAllocation(rebalanceMode);
         Integer size = Integer.valueOf(posted.get("size").toString());
@@ -92,6 +107,9 @@ public class FixedAllocation implements Allocation {
 
     public void completeWith(String isin) {
         //remplacer les manquants par du cash
+        if(allocation.containsKey("_CASH_")){
+            System.out.println("");
+        }
         Double sumOfFundsInPortfolio = this.allocation.values().stream().mapToDouble(a -> a).sum();
         if (sumOfFundsInPortfolio < 1.0) {
             put(isin, 1 - sumOfFundsInPortfolio);

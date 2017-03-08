@@ -1,0 +1,39 @@
+<p>Vous partez avec un capital de départ de 10000€<br ><br>
+    votre mission est de battre l'indice MSCI World sur une période aléatoirement choisie de 8 ans</p>
+
+<br />
+
+<p>La simulation commence dès que vous choisissez une allocation de départ</p>
+<br />
+
+              
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<br />
+<br />
+
+<div class="btn-group" data-toggle="buttons">
+  <label class="profileBtn btn btn-primary  ">
+    <input class="" type="radio" name="options" partEnEuro=1.0 id="profil1" autocomplete="off" > 100% fonds euro
+  </label>
+  <label class="profileBtn btn btn-primary">
+    <input class="" type="radio" name="options" partEnEuro=0.8 id="profil2" autocomplete="off"> 80% fonds euro + 20% MSCI World
+  </label>
+  <label class="profileBtn btn btn-primary">
+    <input class="" type="radio" name="options" partEnEuro=0.5 id="profil3" autocomplete="off"> 50% fonds euro + 50% MSCI World
+  </label>
+      <label class="profileBtn btn btn-primary">
+    <input class="" type="radio" name="options" id="profil3" partEnEuro=0.3 autocomplete="off"> 30% fonds euro + 70% MSCI World
+  </label>
+      <label class="profileBtn btn btn-primary">
+          <input  type="radio" name="options" id="profil3" partEnEuro=0.0 autocomplete="off"> 100% MSCI World
+  </label>
+</div>
+
+<br><br>
+<h2 style="text-align: center">Votre Capital : <span id="capital">10000</span> €</h2>
+<h2 style="text-align: center">MSCI World : <span id="msci">10000</span> €</h2>
+<br />
+<h4 id="result" style="text-align: center"></h4>
+
+<a href="" id="reloadLink" style="display: none;text-align: center" onclick="location.reload(); "><h2>Rejouez</h2></a>

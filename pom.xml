@@ -24,18 +24,20 @@
             </plugin>
             
             -->
-                <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-dependency-plugin</artifactId>
-    <version>2.4</version>
-    <executions>
-      <execution>
-        <id>copy-dependencies</id>
-        <phase>package</phase>
-        <goals><goal>copy-dependencies</goal></goals>
-      </execution>
-    </executions>
-  </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
         
 
@@ -66,17 +68,19 @@
             <version>9.4.1212.jre7</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
-<dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-math3</artifactId>
-    <version>3.2</version>
-</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.2</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.5</version>
             <type>jar</type>
         </dependency>
+        
+        
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

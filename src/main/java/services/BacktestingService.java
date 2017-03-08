@@ -1,6 +1,7 @@
 package services;
 
 import cyterdan.backtest.data.providers.DataProvider;
+import cyterdan.backtest.data.providers.H2DataProvider;
 import cyterdan.backtest.data.providers.PostgresDataProvider;
 import cyterdan.backtest.utils.SerializationUtils;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import org.rapidoid.util.Msc;
 public class BacktestingService {
 
     //postgres data provider for web pages
-    DataProvider dataProvider = new PostgresDataProvider();
+    DataProvider dataProvider = new H2DataProvider();
 
     public BacktestResponse backtest(FixedAllocation allocation, AllocationRebalanceMode rebalanceMode, String benchmark) throws SQLException, IOException {
 
