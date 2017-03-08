@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes/:target/dependency/* com.mycompany.rapidoidtest.NewMain
+web: java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes/:target/dependency/* cyterdan.backtest.app.WebApp
