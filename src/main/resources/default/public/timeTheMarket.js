@@ -38,11 +38,6 @@ function addBand(){
             });
 }
 
-function encode(arg){
-    console.log(md5(arg));
-    return arg;
-
-}
 function end() {
     var html = "Sur une période de 8 ans ("+new Date(startDate).toLocaleDateString()+"-"+new Date(currentDate).toLocaleDateString()+")<br />";
     var perfIndex = Math.round(100*(msci-10000)/10000);
@@ -68,16 +63,16 @@ $('.profileBtn').on('change',function(){
     
     
     if(firstChange){
-                console.log("firstChange");
+                //console.log("firstChange");
                   //magic number qui correspond à aujourdhui - 10ans...
                     var randomStart = randomIntFromInterval(0, 473);
                     lastDate = dateFromStr(msciWorld[randomStart][0]);
                     
                     startDate = dateFromStr(msciWorld[randomStart][0]);
                     currentDate = lastDate;
-                    console.log("lastdate:"+lastDate);
+                   // console.log("lastdate:"+lastDate);
                     var i = randomStart;
-                    console.log("start at"+msciWorld[randomStart][0]);
+                   // console.log("start at"+msciWorld[randomStart][0]);
                     
                     var intervalId = setInterval(function () {
                         //console.log(i);
@@ -99,7 +94,7 @@ $('.profileBtn').on('change',function(){
                         }
                         else {
                             clearInterval(intervalId);
-                            console.log("done at" + msciWorld[i][0]);
+                            //console.log("done at" + msciWorld[i][0]);
                             addBand();
                             end();
                         }
@@ -108,7 +103,7 @@ $('.profileBtn').on('change',function(){
 
     }
     else{
-        console.log("adding band for "+lastEuroPart+" from "+lastDate+" to "+currentDate);
+        //console.log("adding band for "+lastEuroPart+" from "+lastDate+" to "+currentDate);
         addBand();
    
     }
