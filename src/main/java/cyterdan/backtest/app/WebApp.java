@@ -18,7 +18,7 @@ import services.BacktestingService;
  *
  * @author cytermann
  */
-public class Main {
+public class WebApp {
 
     /**
      * @param args the command line arguments
@@ -40,7 +40,9 @@ public class Main {
         });
 
         //renders portfolio.html template
-        On.page("/portfolio").mvc((req, resp) -> {
+        On.page("/portfolio").mvc((req,resp) -> {
+
+            resp.screen().js().add("main.js");
 
             //if we get preset data in the request params
             if (req.params().containsKey(BacktestResponse.PRESET)) {
@@ -51,9 +53,18 @@ public class Main {
                 // encode and set in the page data 
                 return U.map(BacktestResponse.PRESET, Base64.encodeBase64String(new Gson().toJson(deserialized).getBytes()));
             } else {
-                return null;
+                return U.map();
             }
 
+        });
+        
+        // renders timeTheMarket.html
+        On.page("/timeTheMarket").mvc((req,resp) -> {
+            resp.screen().js().add("msciWorld.js");
+
+            //resp.screen().js().add("timeTheMarket.js");
+
+            return "";
         });
 
         //responds to /backtest post requests

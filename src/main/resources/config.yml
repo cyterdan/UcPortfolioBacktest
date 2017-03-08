@@ -6,6 +6,7 @@ app:
   search: false
   menu:
     Assurance Vie: /portfolio
+    Jeu : /timeTheMarket
     Doc:
       To do...: /help
 

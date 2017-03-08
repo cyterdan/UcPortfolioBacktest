@@ -97,6 +97,7 @@ public final class HistoricalData {
     }
 
     public Double putForAt(String isin, LocalDate date, Double value) {
+        
         return this.getFundData(isin).getSerie().put(date, value);
     }
 
