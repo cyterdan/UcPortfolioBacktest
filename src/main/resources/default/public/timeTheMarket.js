@@ -6,6 +6,7 @@ $(document).ready(function () {
     var currentValue;
     var lastEuroPart;
     var hc;
+    var firstDateLabel = 1;
 
     var results = []
 
@@ -120,7 +121,7 @@ $(document).ready(function () {
                 {name: '70% actions', data: results[3]},
                 {name: '100% actions', data: results[4]},
                 {name : 'Votre allocation', data:results[5]}
-            ]
+            ]   
         });
         
         //console.log(results);
@@ -161,7 +162,8 @@ $(document).ready(function () {
                     
                     var date = dateFromStr(msciWorld[i][0]),
                             y = msciWorld[i][1];
-                    series.addPoint([date, y]);
+                            
+                    series.addPoint({x:date, y:y,name:i});
                     currentDate = date;
                     currentValue = y;
                     var previous = msciWorld[i - 1][1];
@@ -236,8 +238,14 @@ $(document).ready(function () {
             text: 'MSCI World'
         },
         xAxis: {
+            title :{text: 'Nombre de mois écoulés'},
             type: 'datetime', labels: {
-                enabled: false
+                enabled : true,
+                formatter : function(value){
+                   //console.log(this.value    );
+                    
+                    return Math.round((this.value-startDate)/(1000 * 60 * 60 * 24*30));
+                }
             }
 
 
