@@ -168,7 +168,7 @@ $(document).ready(function () {
                     currentValue = y;
                     var previous = msciWorld[i - 1][1];
                     var perfMsci = (y - previous) / previous;
-                    var perfEuro = 0.0003;
+                    var perfEuro = 0.0018;
                     capital = capital * (1 + (perfEuro * lastEuroPart + perfMsci * (1 - lastEuroPart)))
                     msci = msci * (1 + perfMsci);
                     $("#msci").html(Math.round(msci));
