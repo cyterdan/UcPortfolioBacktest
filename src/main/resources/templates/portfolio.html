@@ -54,7 +54,7 @@
             var raw = atob('${preset}');
             //console.log(raw);
             var preset = $.parseJSON(raw)
-             var ucs = Object.keys(preset['porte'])
+            var ucs = Object.keys(preset['porte'])
              var localData = [];
              for(var k=0;k<ucs.length;k++){
                  localData.push([ucs[k],preset['porte'][ucs[k]]]);
