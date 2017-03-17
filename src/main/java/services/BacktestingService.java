@@ -65,8 +65,8 @@ public class BacktestingService {
 
 
             Map<String, Object> porteData = new HashMap<>();
-            porteData.put("porte", allocation);
-            porteData.put("rebalanceMode", rebalanceMode);
+            porteData.put("porte", allocation.toAllocationMap());
+            porteData.put("rebalanceMode", rebalanceMode.getMode());
             porteData.put("benchmark", benchmark);
             String permalink =  "/portfolio?preset=" + Msc.urlEncode(SerializationUtils.serialize(porteData));
 

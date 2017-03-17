@@ -1,16 +1,22 @@
 package model;
 
+import com.opencsv.CSVWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 /**
@@ -179,6 +185,38 @@ public final class HistoricalData {
             this.putForAt(CASH, day.plusDays(1), this.getForAt(CASH, day) * 1.00003);
         }
 
+    }
+
+    public void toCsv(String path) throws IOException {
+        CSVWriter csvWriter = new CSVWriter(new FileWriter(new File(path)));
+       
+        
+        LocalDate start = usefulStart();
+        LocalDate end = usefulEnd();
+        int size = history.keySet().size();
+        
+        String [] headers = new String[size+1];
+        headers[0] = "Date";
+        int j=1;
+        for(String isin : history.keySet()){
+            headers[j] = isin;
+            j++;
+        }
+        csvWriter.writeNext(headers);
+        Set<LocalDate> dates = history.get(history.keySet().iterator().next()).getSerie().keySet();
+        for(LocalDate date : dates){
+            
+            String [] data = new  String[size+1];
+            data[0] = date.toString();
+            int i = 1;
+            for(String isin : history.keySet()){
+                data[i] = getForAt(isin, date).toString();
+                i++;
+            }
+            csvWriter.writeNext(data);
+            
+        }
+        csvWriter.close();
     }
 
 }

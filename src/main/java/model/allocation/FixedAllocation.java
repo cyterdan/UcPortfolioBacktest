@@ -126,4 +126,8 @@ public class FixedAllocation implements Allocation {
         allocation.put(isin, allocation.get(isin) * (1 + inDayReturn));
     }
 
+    public HashMap<String, Double> toAllocationMap() {
+        return initialAllocation;
+    }
+
 }
