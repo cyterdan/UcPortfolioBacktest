@@ -26,17 +26,12 @@ public class H2DataProvider extends AbstractDataProvider implements DataProvider
         return connectionPool;
     }
     
+    @Override
     public void logBacktest(String permalink, Double formattedPerf, Double formattedStd) {
-        System.out.println("no log...");
+        //no logging for local database...
     }
     
     
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
 
 }

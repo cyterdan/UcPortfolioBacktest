@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Map;
-import model.DateBasedSerie;
+import model.DailySerie;
 import model.HistoricalData;
 
 /**
- *
+ * compare data moving average
  * @author cytermann
  */
-public class MovingAverageRatioComparator implements Comparator<Map.Entry<String, DateBasedSerie>> {
+public class MovingAverageRatioComparator implements Comparator<Map.Entry<String, DailySerie>> {
 
     private final HistoricalData history;
     
@@ -31,7 +31,7 @@ public class MovingAverageRatioComparator implements Comparator<Map.Entry<String
     
     
     @Override
-    public int compare(Map.Entry<String, DateBasedSerie> o1, Map.Entry<String, DateBasedSerie> o2) {
+    public int compare(Map.Entry<String, DailySerie> o1, Map.Entry<String, DailySerie> o2) {
         if (o1.getValue().getSerie().isEmpty() && o2.getValue().getSerie().isEmpty()) {
             return 0;
         } else {

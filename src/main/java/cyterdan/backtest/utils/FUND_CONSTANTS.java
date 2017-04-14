@@ -2,14 +2,12 @@ package cyterdan.backtest.utils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
- *
+ * Constats for funds accessible through some french assurance-vie
  * @author cytermann
  */
-public class AV {
+public class FUND_CONSTANTS {
 
     public final static List<String> MPL_5STARTS = Arrays.asList(
             "LU0476876759", "LU0476877211", "FR0007055041", "LU0256839274",

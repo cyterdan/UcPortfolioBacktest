@@ -5,16 +5,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
- *
+ * Variable allocation depending on dates
  * @author cytermann
  */
 public class DateBasedAllocation implements Allocation {
 
+    //holds the allocation
     private SortedMap<LocalDate, FixedAllocation> orders = new TreeMap<>();
 
     @Override
@@ -53,17 +52,24 @@ public class DateBasedAllocation implements Allocation {
         return orders.get(lastFundDate).get(isin);
     }
 
-    public void set(LocalDate tuesday, FixedAllocation tuesdayAllocation) {
-        orders.put(tuesday, tuesdayAllocation);
+    /**
+     * sets the allocation for the given date
+     * @param date
+     * @param dateAllocation 
+     */
+    public void set(LocalDate date, FixedAllocation dateAllocation) {
+        orders.put(date, dateAllocation);
     }
 
     @Override
     public void reset() {
-        //nothing happens here :)
+        
+        //Could be implemented but useless for now
     }
 
     @Override
     public double distanceFromInitial(String isin) {
+        //no distance since this allocation is not updated with returns
         return 0.0;
     }
 
@@ -72,6 +78,9 @@ public class DateBasedAllocation implements Allocation {
         //nothing again
     }
 
+    /**
+     * simple display for debugging purposes
+     */
     public void print() {
         for (Map.Entry<LocalDate, FixedAllocation> order : orders.entrySet()) {
             System.out.println(order.getKey() + " : " + order.getValue());

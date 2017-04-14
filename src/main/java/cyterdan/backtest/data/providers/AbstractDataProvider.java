@@ -1,18 +1,11 @@
 package cyterdan.backtest.data.providers;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import model.DateBasedSerie;
 import model.HistoricalData;
 
 /**
@@ -91,6 +84,24 @@ public abstract class AbstractDataProvider implements DataProvider {
         }
 
         return isins;
+    }
+
+    @Override
+    public Boolean isOk() {
+        try {
+            //check connection
+            Boolean isValid = this.getDataSource().getConnection().isValid(5);
+            if (!isValid) {
+                return isValid;
+            }
+            //check data
+            getDataSource().getConnection().createStatement().executeQuery("select * from public.funds limit 1");
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+            return false;
+        }
+        return true;
+
     }
 
 }

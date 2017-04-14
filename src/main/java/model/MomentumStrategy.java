@@ -22,7 +22,7 @@ public enum MomentumStrategy {
     RANDOM,
     BEST_PERFORMANCE_RATIO;
 
-    public Comparator<Map.Entry<String, DateBasedSerie>>
+    public Comparator<Map.Entry<String, DailySerie>>
             getComparator(HistoricalData data, long qty, ChronoUnit unit) {
         switch (this) {
             case BEST_PERFORMANCE:
@@ -43,7 +43,7 @@ public enum MomentumStrategy {
 
     }
 
-    public Double getStatistic(String isin, DateBasedSerie serie, HistoricalData data, long qty, ChronoUnit unit) {
+    public Double getStatistic(String isin, DailySerie serie, HistoricalData data, long qty, ChronoUnit unit) {
         switch (this) {
             case BEST_PERFORMANCE:
                 return serie.totalReturn();

@@ -4,16 +4,16 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
-import model.DateBasedSerie;
+import model.DailySerie;
 
 /**
- *
+ * compares performances
  * @author cytermann
  */
-public class BestPerformanceComparator implements Comparator<Map.Entry<String, DateBasedSerie>> {
+public class BestPerformanceComparator implements Comparator<Map.Entry<String, DailySerie>> {
 
     @Override
-    public int compare(Map.Entry<String, DateBasedSerie> o1, Map.Entry<String, DateBasedSerie> o2) {
+    public int compare(Map.Entry<String, DailySerie> o1, Map.Entry<String, DailySerie> o2) {
         if (o1.getValue().getSerie().isEmpty() && o2.getValue().getSerie().isEmpty()) {
             return 0;
         } else {
