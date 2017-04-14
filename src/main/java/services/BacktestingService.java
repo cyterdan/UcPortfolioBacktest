@@ -12,8 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.BacktestResponse;
-import model.DateBasedSerie;
+import model.DailySerie;
 import model.HistoricalData;
 import model.Portfolio;
 import model.allocation.AllocationRebalanceMode;
@@ -22,14 +24,24 @@ import org.rapidoid.job.Jobs;
 import org.rapidoid.util.Msc;
 
 /**
- *
+ * Portfolio backtesting service
  * @author cytermann
  */
 public class BacktestingService {
 
     //postgres data provider for web pages
-    DataProvider dataProvider = new PostgresDataProvider();
+    private static final DataProvider dataProvider;
 
+    static{
+        dataProvider = new PostgresDataProvider();
+        if(!dataProvider.isOk()){
+            try {
+                throw new Exception("Database is KO");
+            } catch (Exception ex) {
+                Logger.getLogger(BacktestingService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     public BacktestResponse backtest(FixedAllocation allocation, AllocationRebalanceMode rebalanceMode, String benchmark) throws SQLException, IOException {
 
         if (!allocation.isValid()) {
@@ -44,7 +56,7 @@ public class BacktestingService {
             String refIsin = benchmark;
             referenceIsin.add(refIsin);
 
-            DateBasedSerie referenceData = dataProvider.getDataForIsins(referenceIsin).getFundData(refIsin);
+            DailySerie referenceData = dataProvider.getDataForIsins(referenceIsin).getFundData(refIsin);
 
             Portfolio portfolio = new Portfolio(allocation);
 
@@ -52,7 +64,7 @@ public class BacktestingService {
             LocalDate maxDate = data.usefulEnd();
 
 
-            DateBasedSerie capital = portfolio.calculateCapital(minDate, maxDate, data);
+            DailySerie capital = portfolio.calculateAllocationPerformance(minDate, maxDate, data);
 
             double perfAnnual = capital.annualReturns();
 
@@ -65,7 +77,7 @@ public class BacktestingService {
 
 
             Map<String, Object> porteData = new HashMap<>();
-            porteData.put("porte", allocation.toAllocationMap());
+            porteData.put("porte", allocation.getAllocationMap());
             porteData.put("rebalanceMode", rebalanceMode.getMode());
             porteData.put("benchmark", benchmark);
             String permalink =  "/portfolio?preset=" + Msc.urlEncode(SerializationUtils.serialize(porteData));

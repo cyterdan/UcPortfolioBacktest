@@ -11,18 +11,18 @@ import java.util.TreeMap;
  */
 public class Portfolio {
 
-    private final DateBasedSerie capital;
+    private final DailySerie performance;
 
     private final Allocation allocation;
 
     public Portfolio(Allocation allocation) {
         this.allocation = allocation;
-        this.capital = new DateBasedSerie();
+        this.performance = new DailySerie();
     }
 
-    public DateBasedSerie calculateCapital(LocalDate from, LocalDate to, HistoricalData data) {
+    public DailySerie calculateAllocationPerformance(LocalDate from, LocalDate to, HistoricalData data) {
 
-        capital.setValue(from, 1.0);
+        performance.setValue(from, 1.0);
 
         for (LocalDate d = from.plusDays(1); d.isBefore(to); d = d.plusDays(1)) {
 
@@ -57,10 +57,10 @@ public class Portfolio {
 
             }
 
-            capital.setValue(d, capital.getValue(d.minusDays(1)) * (1 + perf));
+            performance.setValue(d, performance.getValue(d.minusDays(1)) * (1 + perf));
         }
 
-        return capital;
+        return performance;
     }
 
 }

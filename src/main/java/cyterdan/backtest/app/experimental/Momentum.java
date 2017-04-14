@@ -1,8 +1,8 @@
-package cyterdan.backtest.app;
+package cyterdan.backtest.app.experimental;
 
 import cyterdan.backtest.data.providers.DataProvider;
 import cyterdan.backtest.data.providers.H2DataProvider;
-import cyterdan.backtest.utils.AV;
+import cyterdan.backtest.utils.FUND_CONSTANTS;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
@@ -14,12 +14,11 @@ import java.util.Iterator;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import model.allocation.AllocationRebalanceMode;
 import model.allocation.DateBasedAllocation;
-import model.DateBasedSerie;
+import model.DailySerie;
 import model.allocation.FixedAllocation;
 import model.HistoricalData;
 import model.MomentumStrategy;
@@ -27,6 +26,7 @@ import model.Portfolio;
 
 /**
  *
+ * Backtest a momentum + moving average strategy on funds
  * @author cytermann
  */
 public class Momentum {
@@ -43,16 +43,37 @@ public class Momentum {
         dataProvider = new H2DataProvider();
 
         Set<String> allIsins = dataProvider.getIsins();
-        List<String> inclusions = AV.MES_PLACEMENTS_LIBERTE;
+        List<String> inclusions = FUND_CONSTANTS.MES_PLACEMENTS_LIBERTE;
 
         //garder que certains fonds
         //retirer les scpis et les fonds euro 
         allIsins = allIsins.stream().filter(isin -> inclusions.contains(isin))
                 .filter(isin -> !isin.contains("SCPI") && !isin.contains("QU")).collect(Collectors.toSet());
         HistoricalData data = dataProvider.getDataForIsins(allIsins);
+        
+        data.excludeNonDailyFunds();
 
-        doMomentum(data, MomentumStrategy.BEST_PERFORMANCE, ChronoUnit.WEEKS, 2, 3, true);
+    //    doMomentum(data, MomentumStrategy.BEST_PERFORMANCE, ChronoUnit.WEEKS, 2, 3, true);
+        
+        Set<String> currentBest = getCurrentBest(data, MomentumStrategy.BEST_PERFORMANCE, ChronoUnit.WEEKS, 2,3);
+        System.out.println("current allocation :"+currentBest);
 
+    }
+    
+    
+    private static Set<String> getCurrentBest(HistoricalData data, MomentumStrategy strategy, ChronoUnit unit, long qty, long maxNbFunds){
+        
+           LocalDate tuesday = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.TUESDAY));
+           
+            HistoricalData subData = data.subData(tuesday.minus(qty,unit), tuesday);
+            //calculer les x meilleurs fonds sur la periode
+            List<Map.Entry<String, DailySerie>> bests = subData.series().stream()
+                    .filter((o) -> !o.getKey().equals(HistoricalData.CASH))
+                    .sorted(strategy.getComparator(data, qty, unit).reversed()).collect(Collectors.toList());
+
+            Set<String> isins = bests.stream().map(b->b.getKey()).limit(maxNbFunds).collect(Collectors.toSet());
+            
+            return isins;
     }
 
     private static void doMomentum(HistoricalData data, MomentumStrategy strategy, ChronoUnit unit, long qty, long maxNbFunds, boolean verbose) throws SQLException, Exception {
@@ -79,7 +100,7 @@ public class Momentum {
             HistoricalData subData = data.subData(debutDePeriode, finDePeriode);
 
             //calculer les x meilleurs fonds sur la periode
-            List<Map.Entry<String, DateBasedSerie>> bests = subData.series().stream()
+            List<Map.Entry<String, DailySerie>> bests = subData.series().stream()
                     .filter((o) -> !o.getKey().equals(HistoricalData.CASH))
                     .sorted(strategy.getComparator(data, qty, unit).reversed()).collect(Collectors.toList());
 
@@ -93,7 +114,7 @@ public class Momentum {
                     .filter((o) -> data.getFundData(o.getKey()).movingAverage(definitelyATuesday, MOVING_AVERAGE_WINDOW_SIZE) < data.getForAt(o.getKey(), definitelyATuesday))
                     .collect(Collectors.toList());
 
-            for (Map.Entry<String, DateBasedSerie> best : bests) {
+            for (Map.Entry<String, DailySerie> best : bests) {
                 String bestIsin = best.getKey();
                 tuesdayAllocation.put(bestIsin, 1.0 / maxNbFunds);
             }
@@ -106,7 +127,6 @@ public class Momentum {
 
             //arbitrer vers ce(s) fonds le mardi
             allocation.set(tuesday, tuesdayAllocation);
-            //orders.put(tuesday, portfolio);
 
         }
 
@@ -115,14 +135,14 @@ public class Momentum {
         }
 
         LocalDate portfolioStart = allocation.firstOrder().plusDays(1);
-        LocalDate portfolioEnd = allocation.lastOrder();
+        LocalDate portfolioEnd = allocation.lastOrder().plusDays(1);
 
         Portfolio portfolio = new Portfolio(allocation);
 
-        DateBasedSerie capital = portfolio.calculateCapital(portfolioStart, portfolioEnd, data);
+        DailySerie performance = portfolio.calculateAllocationPerformance(portfolioStart, portfolioEnd, data);
 
-        double annualReturn = capital.annualReturns();
-        double yearlyVolatility = capital.yearlyVolatility();
+        double annualReturn = performance.annualReturns();
+        double yearlyVolatility = performance.yearlyVolatility();
 
         double sharp = BigDecimal.valueOf((annualReturn - 2.0) / yearlyVolatility).setScale(2, RoundingMode.FLOOR).doubleValue();
         Iterator<LocalDate> iterator = allocation.dates().iterator();
@@ -134,7 +154,7 @@ public class Momentum {
         while(iterator.hasNext()){
             LocalDate date = iterator.next();
             if(iterator.hasNext()){
-            double perf = capital.extractReturn(previous, date);
+            double perf = performance.extractReturn(previous, date);
             if(worst>perf){
                 worst = perf;
                 worstDate = date;
@@ -148,10 +168,6 @@ public class Momentum {
 
         String result = ("momentum strategy " + strategy + " every " + qty + " " + unit + " with " + maxNbFunds + " funds :  sharp " + sharp + " perf  " + annualReturn + " volatility :" + yearlyVolatility);
         System.out.println(result);
-        Set<String> allusedIsin = allocation.dates().stream().map(date-> allocation.getIsinsForDate(date)).flatMap(Set::stream).collect(Collectors.toSet());
-        for(LocalDate date = capital.latestDate();date.isAfter(capital.firstDate().minusDays(1));date=date.minusDays(1)){
-            //System.out.println("_MOMENTUM_STRATEGIE_"+"|"+date+"|"+capital.getValue(date));
-        }
     }
     
  

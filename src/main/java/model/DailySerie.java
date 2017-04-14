@@ -15,9 +15,10 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /**
  *
+ * represent a daily temporal series 
  * @author cytermann
  */
-public class DateBasedSerie {
+public class DailySerie {
 
     private final SortedMap<LocalDate, Double> serie;
 
@@ -52,11 +53,11 @@ public class DateBasedSerie {
         return optional.orElse(Double.MAX_VALUE);
     }
 
-    public DateBasedSerie() {
+    public DailySerie() {
         this.serie = new TreeMap<>();
     }
 
-    public DateBasedSerie(SortedMap<LocalDate, Double> serie) {
+    public DailySerie(SortedMap<LocalDate, Double> serie) {
         this.serie = serie;
     }
 
@@ -72,9 +73,9 @@ public class DateBasedSerie {
         return serie.lastKey();
     }
 
-    public DateBasedSerie extract(LocalDate fromKey, LocalDate toKey) {
+    public DailySerie extract(LocalDate fromKey, LocalDate toKey) {
         SortedMap<LocalDate, Double> ret = serie.subMap(fromKey, toKey);
-        return new DateBasedSerie(ret);
+        return new DailySerie(ret);
     }
 
     private static double getStd(Collection<Double> v) {
@@ -143,6 +144,11 @@ public class DateBasedSerie {
         return formatAsJsArray(serie);
     }
 
+    /**
+     * awful hack to transform a nice {date:value} map into a list of y/m/d as required by highcharts input format
+     * @param K
+     * @return 
+     */
     private static List<List> formatAsJsArray(SortedMap<LocalDate, Double> K) {
         double normal = K.get(K.firstKey());
         //formater l'historique
@@ -157,5 +163,17 @@ public class DateBasedSerie {
             history.add(list);
         }
         return history;
+    }
+
+    double averageWeeklyChanges() {
+        long sum = 0;
+        long count=0;
+        LocalDate start = firstDate();
+        LocalDate end = latestDate();
+        for(LocalDate date = start;date.isBefore(end);date = date.plusWeeks(1)){
+            sum+=this.serie.subMap(date, date.plusWeeks(1)).values().stream().distinct().count();
+            count+=1;
+        }
+        return ((float) sum)/count;
     }
 }

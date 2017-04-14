@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * flexible backtest response object
  * @author cytermann
  */
 public class BacktestResponse {
@@ -41,12 +41,12 @@ public class BacktestResponse {
         return err;
     }
 
-    public BacktestResponse history(DateBasedSerie history) {
+    public BacktestResponse history(DailySerie history) {
         this.response.put("history", history.toJsArray());
         return this;
     }
 
-    public BacktestResponse reference(DateBasedSerie history) {
+    public BacktestResponse reference(DailySerie history) {
         this.response.put("reference", history.toJsArray());
         return this;
     }

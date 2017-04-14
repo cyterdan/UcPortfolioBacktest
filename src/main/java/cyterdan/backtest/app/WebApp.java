@@ -16,6 +16,7 @@ import services.BacktestingService;
 
 /**
  *
+ * Web application main class and controllers
  * @author cytermann
  */
 public class WebApp {
@@ -25,6 +26,7 @@ public class WebApp {
      */
     public static void main(String[] args) throws SQLException {
 
+        
         BacktestingService backtestingService = new BacktestingService();
 
         //port setup in case it's imposed by the environnement (heroku)
@@ -50,8 +52,9 @@ public class WebApp {
                 Map<String, Object> deserialized = SerializationUtils.deserialize(req.param(BacktestResponse.PRESET), new TypeToken<Map<String, Object>>() {
                 }.getType());
 
+                String base64encoded = new String(Base64.encodeBase64(new Gson().toJson(deserialized).getBytes()));
                 // encode and set in the page data 
-                return U.map(BacktestResponse.PRESET, Base64.encodeBase64String(new Gson().toJson(deserialized).getBytes()));
+                return U.map(BacktestResponse.PRESET,base64encoded );
             } else {
                 return U.map();
             }
@@ -61,8 +64,6 @@ public class WebApp {
         // renders timeTheMarket.html
         On.page("/timeTheMarket").mvc((req,resp) -> {
             resp.screen().js().add("msciWorld.js");
-
-            //resp.screen().js().add("timeTheMarket.js");
 
             return "";
         });

@@ -15,6 +15,8 @@ import model.HistoricalData;
  */
 public interface DataProvider {
 
+    public Boolean isOk() ;
+    
     public DataSource getDataSource() throws SQLException;
 
     public void logBacktest(String permalink, Double formattedPerf, Double formattedStd);

@@ -1,4 +1,4 @@
-package cyterdan.backtest.app;
+package cyterdan.backtest.app.experimental;
 
 import cyterdan.backtest.data.providers.DataProvider;
 import cyterdan.backtest.data.providers.H2DataProvider;
@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import model.DateBasedSerie;
+import model.DailySerie;
 import model.HistoricalData;
 import model.Portfolio;
 import model.allocation.AllocationRebalanceMode;
@@ -16,7 +16,7 @@ import model.allocation.DateBasedAllocation;
 import model.allocation.FixedAllocation;
 
 /**
- *
+ * try to use momentum and leveraged funds to outperform the CAC index. => does not work :D
  * @author cytermann
  */
 public class CacMomentum {
@@ -35,13 +35,7 @@ public class CacMomentum {
         HistoricalData data = dataProvider.getDataForIsins(isins);
 
         doMomentum(data, ChronoUnit.DAYS, 5, -0.02, 0.006);
-        /*for (double lb = -2.0 / 100; lb < -0.1 / 100; lb += 0.1 / 100) {
-            for (double ub = 0.1 / 100; ub < 2.0 / 100; ub += 0.1 / 100) {
-                for (int d = 1; d < 30; d++) {
-                    doMomentum(data, ChronoUnit.DAYS, d, lb, ub);
-                }
-            }
-        }*/
+        
 
     }
 
@@ -70,7 +64,7 @@ public class CacMomentum {
         }
 
         Portfolio portfolio = new Portfolio(allocation);
-        DateBasedSerie K = portfolio.calculateCapital(start, end, data);
+        DailySerie K = portfolio.calculateAllocationPerformance(start, end, data);
 
         double annualReturns = K.annualReturns();
         double sharp = (annualReturns - 2) / K.yearlyVolatility();

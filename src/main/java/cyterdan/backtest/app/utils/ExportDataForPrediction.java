@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Map.Entry;
 import java.util.Set;
-import model.DateBasedSerie;
+import model.DailySerie;
 import model.HistoricalData;
 
 /**
@@ -42,7 +42,7 @@ public class ExportDataForPrediction {
             int qty =4;
             ChronoUnit unit = ChronoUnit.WEEKS;
             for (LocalDate date = firstDate.plus(qty,unit); date.isBefore(lastDate.minus(qty,unit).minusDays(1)); date = date.plus(qty,unit)) {
-                for (Entry<String, DateBasedSerie> entry : subData.series()) {
+                for (Entry<String, DailySerie> entry : subData.series()) {
                     Double perf;
                     if (!entry.getKey().equals(isin)) {
                         perf = entry.getValue().extractReturn(date.minus(qty,unit), date);
