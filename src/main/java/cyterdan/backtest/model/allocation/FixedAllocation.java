@@ -1,4 +1,4 @@
-package model.allocation;
+package cyterdan.backtest.model.allocation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,13 +10,14 @@ import java.util.regex.Pattern;
 
 /**
  * Basic fund allocation (= {fund1:30%,fund2:50%,fund3:20%})
+ *
  * @author cytermann
  */
 public class FixedAllocation implements Allocation {
 
     //this is the initial allocation
     private final HashMap<String, Double> initialAllocation;
-    
+
     //this is the 'live' allocation, updated with returns
     private HashMap<String, Double> allocation;
 
@@ -31,18 +32,18 @@ public class FixedAllocation implements Allocation {
     @Override
     public String toString() {
         String string = "";
-        for(String isin : allocation.keySet()){
-            String formatted = String.valueOf(100*(new BigDecimal(allocation.get(isin)).setScale(2,RoundingMode.FLOOR)).doubleValue())+"%";
-            string+="|"+isin+":"+formatted;
+        for (String isin : allocation.keySet()) {
+            String formatted = String.valueOf(100 * (new BigDecimal(allocation.get(isin)).setScale(2, RoundingMode.FLOOR)).doubleValue()) + "%";
+            string += "|" + isin + ":" + formatted;
         }
-        
+
         return string;
 
     }
 
-    
     /**
-     *    parses an allocation from html form data
+     * parses an allocation from html form data
+     * 
      */
     public static FixedAllocation fromHtmlFormData(Map<String, Object> posted, AllocationRebalanceMode rebalanceMode) {
         FixedAllocation ret = new FixedAllocation(rebalanceMode);
@@ -84,7 +85,8 @@ public class FixedAllocation implements Allocation {
 
     /**
      * checks the allocation is coherent : sum of parts is not to far from 100%
-     * @return 
+     *
+     * @return
      */
     public boolean isValid() {
         double partSum = allocation.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -117,11 +119,10 @@ public class FixedAllocation implements Allocation {
 
     /**
      * completes the allocation with the given fund to reach 100%
-     * @param isin 
+     *
+     * @param isin
      */
     public void completeWith(String isin) {
-        //remplacer les manquants par du cash
-     
         Double sumOfFundsInPortfolio = this.allocation.values().stream().mapToDouble(a -> a).sum();
         if (sumOfFundsInPortfolio < 1.0) {
             put(isin, 1 - sumOfFundsInPortfolio);
@@ -135,7 +136,9 @@ public class FixedAllocation implements Allocation {
 
     @Override
     public void updatePositionWithReturn(String isin, Double inDayReturn) {
-        allocation.put(isin, allocation.get(isin) * (1 + inDayReturn));
+        if (allocation.values().size() > 1) {
+            allocation.put(isin, allocation.get(isin) * (1 + inDayReturn));
+        }
     }
 
     public HashMap<String, Double> getAllocationMap() {

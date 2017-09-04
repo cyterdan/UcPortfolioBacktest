@@ -6,7 +6,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
-import model.HistoricalData;
+import cyterdan.backtest.model.HistoricalData;
 
 /**
  *

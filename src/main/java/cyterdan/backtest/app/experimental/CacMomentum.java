@@ -8,12 +8,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import model.DailySerie;
-import model.HistoricalData;
-import model.Portfolio;
-import model.allocation.AllocationRebalanceMode;
-import model.allocation.DateBasedAllocation;
-import model.allocation.FixedAllocation;
+import cyterdan.backtest.model.DailySerie;
+import cyterdan.backtest.model.HistoricalData;
+import cyterdan.backtest.model.Portfolio;
+import cyterdan.backtest.model.allocation.AllocationRebalanceMode;
+import cyterdan.backtest.model.allocation.DateBasedAllocation;
+import cyterdan.backtest.model.allocation.FixedAllocation;
 
 /**
  * try to use momentum and leveraged funds to outperform the CAC index. => does not work :D

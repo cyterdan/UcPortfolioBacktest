@@ -5,10 +5,13 @@ import com.google.gson.reflect.TypeToken;
 import cyterdan.backtest.utils.SerializationUtils;
 import java.sql.SQLException;
 import java.util.Map;
-import model.BacktestResponse;
-import model.allocation.AllocationRebalanceMode;
-import model.allocation.FixedAllocation;
+import cyterdan.backtest.model.BacktestResponse;
+import cyterdan.backtest.model.DailySerie;
+import cyterdan.backtest.model.HistoricalResponse;
+import cyterdan.backtest.model.allocation.AllocationRebalanceMode;
+import cyterdan.backtest.model.allocation.FixedAllocation;
 import org.apache.commons.codec.binary.Base64;
+import org.rapidoid.annotation.Param;
 import org.rapidoid.http.Req;
 import org.rapidoid.setup.On;
 import org.rapidoid.u.U;
@@ -39,6 +42,12 @@ public class WebApp {
         On.page("/").html((req, resp) -> {
             resp.redirect("/portfolio");
             return "";
+        });
+        
+        On.get("/historical").json((String isins) ->{
+            HistoricalResponse historicalData = backtestingService.historicalData(isins);
+            return historicalData;
+            
         });
 
         //renders portfolio.html template

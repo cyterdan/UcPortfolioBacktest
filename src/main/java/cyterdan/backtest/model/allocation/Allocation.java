@@ -1,4 +1,4 @@
-package model.allocation;
+package cyterdan.backtest.model.allocation;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.Set;
 public interface Allocation {
 
     /**
-     * reset the allocation to it's initial state (if this type allocation changes)
+     * reset the allocation to it's initial state
      */
     public void reset();
 

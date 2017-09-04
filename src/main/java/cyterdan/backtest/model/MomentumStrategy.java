@@ -1,8 +1,8 @@
-package model;
+package cyterdan.backtest.model;
 
-import comparators.BestPerformanceComparator;
-import comparators.MovingAverageRatioComparator;
-import comparators.SharpRatioComparator;
+import cyterdan.backtest.comparators.BestPerformanceComparator;
+import cyterdan.backtest.comparators.MovingAverageRatioComparator;
+import cyterdan.backtest.comparators.SharpRatioComparator;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.IdentityHashMap;

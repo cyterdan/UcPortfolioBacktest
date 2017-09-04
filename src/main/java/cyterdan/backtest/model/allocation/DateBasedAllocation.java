@@ -1,4 +1,4 @@
-package model.allocation;
+package cyterdan.backtest.model.allocation;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -13,7 +13,7 @@ import java.util.TreeMap;
  */
 public class DateBasedAllocation implements Allocation {
 
-    //holds the allocation
+    //holds the allocations for each date
     private SortedMap<LocalDate, FixedAllocation> orders = new TreeMap<>();
 
     @Override

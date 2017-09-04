@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Map.Entry;
 import java.util.Set;
-import model.DailySerie;
-import model.HistoricalData;
+import cyterdan.backtest.model.DailySerie;
+import cyterdan.backtest.model.HistoricalData;
 
 /**
  *

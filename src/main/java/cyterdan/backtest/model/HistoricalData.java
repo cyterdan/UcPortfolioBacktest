@@ -1,4 +1,4 @@
-package model;
+package cyterdan.backtest.model;
 
 import com.opencsv.CSVWriter;
 import java.io.File;
@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
  */
 public final class HistoricalData {
 
-    HashMap<String, DailySerie> history;
+    Map<String, DailySerie> history;
     public static final String CASH = "_CASH_";
 
-    public HistoricalData(HashMap<String, DailySerie> history) {
+    public HistoricalData(Map<String, DailySerie> history) {
         this.history = history;
     }
 

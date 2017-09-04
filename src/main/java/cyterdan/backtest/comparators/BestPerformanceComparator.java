@@ -1,10 +1,10 @@
-package comparators;
+package cyterdan.backtest.comparators;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
-import model.DailySerie;
+import cyterdan.backtest.model.DailySerie;
 
 /**
  * compares performances

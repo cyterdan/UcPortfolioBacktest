@@ -1,7 +1,8 @@
-package model;
+package cyterdan.backtest.model;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +16,8 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 /**
  *
- * represent a daily temporal series 
+ * represent a daily temporal series
+ *
  * @author cytermann
  */
 public class DailySerie {
@@ -23,7 +25,18 @@ public class DailySerie {
     private final SortedMap<LocalDate, Double> serie;
 
     public Double extractReturn(LocalDate from, LocalDate to) {
-        return (double) (serie.get(to) - serie.get(from)) / serie.get(from);
+        try {
+            if(!serie.containsKey(from)){
+                return 0.0;
+            }
+            if(!serie.containsKey(to)){
+                return 0.0;
+            }
+            return (double) (serie.get(to) - serie.get(from)) / serie.get(from);
+        } catch (NullPointerException npe) {
+            System.out.println(npe);
+            throw new NullPointerException();
+        }
     }
 
     public Double getValue(LocalDate date) {
@@ -108,6 +121,32 @@ public class DailySerie {
 
     }
 
+    public double maxMonthlyDrawdown() {
+
+        LocalDate firstDate = firstDate();
+        LocalDate firstFirstOfTheMonth = (firstDate.getDayOfMonth() == 1) ? firstDate : firstDate.plusMonths(1).withDayOfMonth(1);
+
+        LocalDate lastDate = latestDate();
+        LocalDate lastFirstOfTheMonth = lastDate.minusMonths(1).withDayOfMonth(1);
+        SortedMap<LocalDate, Double> monthlyReturns = new TreeMap<>();
+        LocalDate day = firstFirstOfTheMonth;
+        while (day.isBefore(lastFirstOfTheMonth)) {
+            SortedMap<LocalDate, Double> Kmonth = serie.subMap(day, day.plusMonths(1));
+            LocalDate first = Kmonth.firstKey();
+            LocalDate last = Kmonth.lastKey();
+            Double vlFirst = Kmonth.get(first);
+            Double vlLast = Kmonth.get(last);
+
+            double ret = (vlLast - vlFirst) / vlFirst;
+            monthlyReturns.put(day, ret);
+            day = day.plusMonths(1);
+        }
+
+        double maxDrop = monthlyReturns.values().stream().mapToDouble(d->d).min().getAsDouble();
+        return maxDrop;
+
+    }
+
     public double yearlyVolatility() {
 
         LocalDate firstMonday = firstDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
@@ -145,9 +184,11 @@ public class DailySerie {
     }
 
     /**
-     * awful hack to transform a nice {date:value} map into a list of y/m/d as required by highcharts input format
+     * awful hack to transform a nice {date:value} map into a list of y/m/d as
+     * required by highcharts input format
+     *
      * @param K
-     * @return 
+     * @return
      */
     private static List<List> formatAsJsArray(SortedMap<LocalDate, Double> K) {
         double normal = K.get(K.firstKey());
@@ -167,13 +208,28 @@ public class DailySerie {
 
     double averageWeeklyChanges() {
         long sum = 0;
-        long count=0;
+        long count = 0;
         LocalDate start = firstDate();
         LocalDate end = latestDate();
-        for(LocalDate date = start;date.isBefore(end);date = date.plusWeeks(1)){
-            sum+=this.serie.subMap(date, date.plusWeeks(1)).values().stream().distinct().count();
-            count+=1;
+        for (LocalDate date = start; date.isBefore(end); date = date.plusWeeks(1)) {
+            sum += this.serie.subMap(date, date.plusWeeks(1)).values().stream().distinct().count();
+            count += 1;
         }
-        return ((float) sum)/count;
+        return ((float) sum) / count;
+    }
+
+    public int numberOfFullYears() {
+        LocalDate earliest = firstDate();
+        LocalDate latest = latestDate();
+        int startYear = earliest.getYear();
+        if (earliest.isAfter(earliest.withMonth(Month.JANUARY.getValue()).withDayOfMonth(1))) {
+            startYear++;
+        }
+        int endYear = latest.getYear();
+        if (latest.isBefore(latest.withMonth(12).withDayOfMonth(31))) {
+            endYear--;
+        }
+        return endYear - startYear + 1;
+
     }
 }

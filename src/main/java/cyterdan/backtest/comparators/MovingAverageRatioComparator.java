@@ -1,11 +1,11 @@
-package comparators;
+package cyterdan.backtest.comparators;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Map;
-import model.DailySerie;
-import model.HistoricalData;
+import cyterdan.backtest.model.DailySerie;
+import cyterdan.backtest.model.HistoricalData;
 
 /**
  * compare data moving average

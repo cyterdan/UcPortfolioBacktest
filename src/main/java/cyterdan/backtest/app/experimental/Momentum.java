@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import model.allocation.AllocationRebalanceMode;
-import model.allocation.DateBasedAllocation;
-import model.DailySerie;
-import model.allocation.FixedAllocation;
-import model.HistoricalData;
-import model.MomentumStrategy;
-import model.Portfolio;
+import cyterdan.backtest.model.allocation.AllocationRebalanceMode;
+import cyterdan.backtest.model.allocation.DateBasedAllocation;
+import cyterdan.backtest.model.DailySerie;
+import cyterdan.backtest.model.allocation.FixedAllocation;
+import cyterdan.backtest.model.HistoricalData;
+import cyterdan.backtest.model.MomentumStrategy;
+import cyterdan.backtest.model.Portfolio;
 
 /**
  *
@@ -63,9 +63,9 @@ public class Momentum {
     
     private static Set<String> getCurrentBest(HistoricalData data, MomentumStrategy strategy, ChronoUnit unit, long qty, long maxNbFunds){
         
-           LocalDate tuesday = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.TUESDAY));
+           LocalDate friday = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY));
            
-            HistoricalData subData = data.subData(tuesday.minus(qty,unit), tuesday);
+            HistoricalData subData = data.subData(friday.minus(qty,unit), friday);
             //calculer les x meilleurs fonds sur la periode
             List<Map.Entry<String, DailySerie>> bests = subData.series().stream()
                     .filter((o) -> !o.getKey().equals(HistoricalData.CASH))

@@ -1,4 +1,4 @@
-package model.allocation;
+package cyterdan.backtest.model.allocation;
 
 /**
  * Rebalancing modes for an allocation

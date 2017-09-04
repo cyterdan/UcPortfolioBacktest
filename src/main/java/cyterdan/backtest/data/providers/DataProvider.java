@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import javax.sql.DataSource;
-import model.HistoricalData;
+import cyterdan.backtest.model.HistoricalData;
 
 /**
  * Interface for funds historical data provider

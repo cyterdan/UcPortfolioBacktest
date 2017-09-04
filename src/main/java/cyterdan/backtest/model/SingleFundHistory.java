@@ -1,5 +1,5 @@
 
-package model;
+package cyterdan.backtest.model;
 
 import java.util.Map.Entry;
 

@@ -1,6 +1,6 @@
-package model;
+package cyterdan.backtest.model;
 
-import model.allocation.Allocation;
+import cyterdan.backtest.model.allocation.Allocation;
 import java.time.LocalDate;
 import java.util.SortedMap;
 import java.util.TreeMap;

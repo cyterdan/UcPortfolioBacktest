@@ -1,8 +1,8 @@
-package comparators;
+package cyterdan.backtest.comparators;
 
 import java.util.Comparator;
 import java.util.Map;
-import model.DailySerie;
+import cyterdan.backtest.model.DailySerie;
 
 /**
  * compares fund sharp ratios
