@@ -1,12 +1,12 @@
 ## YAML Template.
 ---
 app:
-  brand: 'Backtest de portefeuille'
-  title: 'backtester UC'
+  brand: 'French AV Portfolio backtest'
+  title: 'UC backtest'
   search: false
   menu:
     Assurance Vie: /portfolio
-    Jeu : /timeTheMarket
+    Market Timing Game : /timeTheMarket
     Doc:
       To do...: /help
 

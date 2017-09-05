@@ -1,12 +1,25 @@
-<p>Vous partez avec un capital de départ de 10000€<br ><br>
-    votre mission est de battre l'indice MSCI World sur une période aléatoirement choisie de 8 ans</p>
 
-<br />
+<h4>The goal of this game is to demonstrate the difficulty of timing the market</h4>
 
-<p>La simulation commence dès que vous choisissez une allocation de départ</p>
+<h5><i>Initial idea came from <a href="https://qz.com/487013/this-game-will-show-you-just-how-foolish-it-is-to-sell-stocks-right-now/">this similar game</a> only adapted to 
+a typical French investor scenario</i></h5>
 
-<p><b>Vous pouvez modifiez ensuite votre allocation en fonction de vos.. convictions..</b></p>
-<br />
+    <h2>Instructions : </h2>
+    
+<h4>
+    You are given an initial capital of 10000€ <br/><br/>
+    
+    Over a period of 8 years (randomly selected), you will decide how much of your portfolio 
+    should be in "the market" (we'll use MSCI World index in this case).
+    The rest of your capital will be invested in a €-fund (fixed 2% annual return)<br/><br/>
+    
+    You can, of course, change your allocation at any time if you feel like a reversal is coming.
+    
+    At the end of the simulation, we'll compare your strategy with a portfolio 100% invested in the market.
+
+    <br/>
+    The game will start as soon as you choose an initial allocation.
+</h4>
 
               
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
@@ -16,16 +29,16 @@
 
 <div class="btn-group" data-toggle="buttons">
   <label class="profileBtn btn btn-primary  ">
-    <input class="" type="radio" name="options" partEnEuro=1.0 id="profil1" autocomplete="off" > 100% fonds euro
+    <input class="" type="radio" name="options" partEnEuro=1.0 id="profil1" autocomplete="off" > 100% euro fund
   </label>
   <label class="profileBtn btn btn-primary">
-    <input class="" type="radio" name="options" partEnEuro=0.8 id="profil2" autocomplete="off"> 80% fonds euro + 20% MSCI World
+    <input class="" type="radio" name="options" partEnEuro=0.8 id="profil2" autocomplete="off"> 80% euro fund + 20% MSCI World
   </label>
   <label class="profileBtn btn btn-primary">
-    <input class="" type="radio" name="options" partEnEuro=0.5 id="profil3" autocomplete="off"> 50% fonds euro + 50% MSCI World
+    <input class="" type="radio" name="options" partEnEuro=0.5 id="profil3" autocomplete="off"> 50% euro fund + 50% MSCI World
   </label>
       <label class="profileBtn btn btn-primary">
-    <input class="" type="radio" name="options" id="profil3" partEnEuro=0.3 autocomplete="off"> 30% fonds euro + 70% MSCI World
+    <input class="" type="radio" name="options" id="profil3" partEnEuro=0.3 autocomplete="off"> 30% euro fund + 70% MSCI World
   </label>
       <label class="profileBtn btn btn-primary">
           <input  type="radio" name="options" id="profil3" partEnEuro=0.0 autocomplete="off"> 100% MSCI World
@@ -33,10 +46,10 @@
 </div>
 
 <br><br>
-<h2 style="text-align: center">Votre Capital : <span id="capital">10000</span> €</h2>
+<h2 style="text-align: center">Your Capital : <span id="capital">10000</span> €</h2>
 <h2 style="text-align: center">MSCI World : <span id="msci">10000</span> €</h2>
 <br />
 <h4 id="result" style="text-align: center"></h4>
 
 <div id="resultsGraph"></div>
-<a href="" id="reloadLink" style="display: none;text-align: center" onclick="location.reload(); "><h2>Rejouez</h2></a>
+<a href="" id="reloadLink" style="display: none;text-align: center" onclick="location.reload(); "><h2>Play again</h2></a>

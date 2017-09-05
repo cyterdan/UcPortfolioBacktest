@@ -1,69 +1,84 @@
 
+<div class="container">
 
-<div style="width:50%;">
-    <p>
-        Configurer un portefeuille :
-    </p>
-    <div id="grid" style="float:left"></div>
-</div>
-<div style="position: relative;float:left;left : 50px;">
-    <p >
-        Options : 
-    </p>
-
-    <label for="reference"> Benchmark : </label>
-    <select id="reference">
-        <option value="_MSCI_The_World_Index">MSCI World</option>
-        <option value="_75PCT_MSCI_World_PLUS_25PCT_ML_Global">75% MSCI World + 25% ML Global</option>
-        <option value="_25PCT_ML_euro_1TOTOTO3SSS75PCT_Euro_Stoxx">25% ML euro 1/3 + 75% Euro Stoxx</option>
-        <option value="_EONIA_PLUS_2PCT">Eonia + 2%</option>
-        <option value="_Taux_net_du_Livret_A">Livret A</option>
-<!--        <option value="_MOMENTUM_STRATEGIE_">Momentum strategy test</option>-->
-     </select>
-    <br /><br/>
-    <label for="rebalance"> Réquilibrage : </label>
-    <select id="rebalance">
-        <option value="0">Jamais</option>
-        <option value="1">Toutes les deux semaines</option>
-        <option value="2">Dès  qu'une part s'écarte de plus de 5%</option>
-    </select>
-
-
-</div>
-<br />
-<div style="float: none">
-    <br/>
-    <br />
-    <div id="goButton" class="bbtn" >Back-tester!</div>
-    <br />
-
-    <div id="permalink" class="alert-info" style="text-align: center" ></div>
-<br />
-
-    <div id="results">
-        <div id="perf" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:left" ></div>
-        <div id="std" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:right" ></div>
-
-        <div id="history" style="min-width: 310px; height: 400px; margin: 0 auto;float:none"></div>
+    <div id="introText" class="row">
+        <h4>
+            This simulation tool will backtest an allocation for mutual funds available 
+            in popular <a href="https://fr.wikipedia.org/wiki/Assurance-vie"><i>Assurance vie</i></a>
+        </h4>
+        <h5>Source code can be found on <a href="https://github.com/cyterdan">github</a></h5>
     </div>
+
+    <div class="row">
+
+        <h3> Configure a portfolio : </h3>
+        <h5> start typing a fund name of ISIN </h5>
+        <h5> choose an allocation for the fund between 0% and 100%</h5>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col">
+            <div id="grid" ></div>
+        </div>
+
+
+        <div class="col">
+
+            <div >
+                <p >
+                    Options : 
+                </p>
+
+                <label for="reference"> Choose a benchmark : </label>
+                <select id="reference">
+                    <option value="_MSCI_The_World_Index">MSCI World</option>
+                    <option value="_75PCT_MSCI_World_PLUS_25PCT_ML_Global">75% MSCI World + 25% ML Global</option>
+                    <option value="_25PCT_ML_euro_1TOTOTO3SSS75PCT_Euro_Stoxx">25% ML euro 1/3 + 75% Euro Stoxx</option>
+                    <option value="_EONIA_PLUS_2PCT">Eonia + 2%</option>
+                    <option value="_Taux_net_du_Livret_A">Livret A</option>
+                    <option value="_MOMENTUM_STRATEGIE_">Momentum strategy test</option>
+                </select>
+                <br /><br/>
+                <label for="rebalance"> Choose a rebalancing mode : </label>
+                <select id="rebalance">
+                    <option value="0">None</option>
+                    <option value="1">Every 2 weeks</option>
+                    <option value="2">Once the allocation is 5% of the initial</option>
+                </select>
+            </div>
+            <div id="goButton" class="bbtn" >Backtest!</div>
+            <div id="permalink" class="alert-info" style="text-align: center" ></div>
+
+        </div>
+    </div>
+
 </div>
+
+<div id="results">
+    <div id="perf" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:left" ></div>
+    <div id="std" style="min-width: 500px; max-width: 500px; height: 500px; margin: 0 auto;float:right" ></div>
+    <div id="history" style="min-width: 310px; height: 400px; margin: 0 auto;float:none"></div>
+</div>
+
 <script>
     $(document).ready(function () {
         if ('${preset}' !== 'N/A') {
-           
+
             var raw = atob('${preset}');
             //console.log(raw);
             var preset = $.parseJSON(raw)
             var ucs = Object.keys(preset['porte'])
-             var localData = [];
-             for(var k=0;k<ucs.length;k++){
-                 localData.push([ucs[k],preset['porte'][ucs[k]]]);
-             }
+            var localData = [];
+            for (var k = 0; k < ucs.length; k++) {
+                localData.push([ucs[k], preset['porte'][ucs[k]]]);
+            }
             // console.log(localData);
-            
+
             if (hot.getData()[0][0] == undefined) {
                 extended = []
-                for (var j = 0; j < Math.max(15,localData.length); j++) {
+                for (var j = 0; j < Math.max(15, localData.length); j++) {
                     if (j < localData.length) {
                         extended.push(localData[j]);
                     }
@@ -74,7 +89,7 @@
                 }
                 //console.log(extended);
                 hot.loadData(extended);
-                
+
                 $('#rebalance').val(preset['rebalanceMode']);
                 $('#benchmark').val(preset['benchmark']);
 

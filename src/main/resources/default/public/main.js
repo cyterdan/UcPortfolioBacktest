@@ -83,7 +83,7 @@ $(document).ready(function () {
                 zoomType: 'x'
             },
             title: {
-                text: 'Historique de ce portefeuille'
+                text: 'Portfolio historical data'
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
@@ -148,7 +148,7 @@ $(document).ready(function () {
                 plotShadow: false
             },
             title: {
-                text: 'Performance annuelle'
+                text: 'Annual performance'
             },
             pane: {
                 startAngle: -120,
@@ -269,7 +269,7 @@ $(document).ready(function () {
                 plotShadow: false
             },
             title: {
-                text: 'Volatilité hebdomadaire'
+                text: 'Volatility'
             },
             pane: {
                 startAngle: -120,
@@ -347,7 +347,7 @@ $(document).ready(function () {
                     }]
             },
             series: [{
-                    name: 'Volatilité hebdomadaire',
+                    name: 'Volatility',
                     data: [parseFloat(std.toFixed(2))],
                     tooltip: {
                         valueSuffix: '%'
@@ -384,7 +384,7 @@ $(document).ready(function () {
                 opacity: .5,
                 color: '#fff'
             },
-            message: "backtest en cours.."
+            message: "Backtesting.."
 
         });
         
@@ -420,14 +420,14 @@ $(document).ready(function () {
 
                     //console.log(h);
                     doGraph(h, r, data.perf, data.std);
-                    $("#permalink").html("<a href='" + data.permalink + "' > lien permanent vers ce portefeuil </a>");
+                    $("#permalink").html("<a href='" + data.permalink + "' > Portfolio permalink </a>");
                 }
 
 
             },
             error: function () {
                 $.unblockUI();
-                alert("Oops ! quelque chose est cassé");
+                alert("Oops ! something is broken");
             }
 
         }).done(function () {

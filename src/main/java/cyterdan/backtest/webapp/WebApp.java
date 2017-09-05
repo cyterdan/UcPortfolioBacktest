@@ -68,6 +68,7 @@ public class WebApp {
         
         // renders timeTheMarket.html
         On.page("/timeTheMarket").mvc((req,resp) -> {
+            
             resp.screen().js().add("msciWorld.js");
 
             return "";

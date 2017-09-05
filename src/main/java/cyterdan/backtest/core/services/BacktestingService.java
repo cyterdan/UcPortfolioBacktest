@@ -48,13 +48,13 @@ public class BacktestingService {
     public BacktestResponse backtest(FixedAllocation allocation, AllocationRebalanceMode rebalanceMode, String benchmark) throws SQLException, IOException {
 
         if (!allocation.isValid()) {
-            return BacktestResponse.error("La somme des parts doit faire 100%");
+            return BacktestResponse.error("sum of allocations must be 100%");
         } else {
             Set<String> isinSet = allocation.getFunds();
 
             HistoricalData data = dataProvider.getDataForIsins(isinSet);
 
-            Set<String> referenceIsin = new HashSet<>();
+                Set<String> referenceIsin = new HashSet<>();
 
             String refIsin = benchmark;
             referenceIsin.add(refIsin);

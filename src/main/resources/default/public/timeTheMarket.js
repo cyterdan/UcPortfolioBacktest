@@ -12,15 +12,15 @@ $(document).ready(function () {
 
     function getVisualForValue(euroPart) {
         if (euroPart == 1.0)
-            return {color: '#edffd0', text: '0% en actions'};
+            return {color: '#edffd0', text: '0% Stocks'};
         if (euroPart == 0.8)
-            return {color: '#d3ffba', text: '20% en actions'};
+            return {color: '#d3ffba', text: '20% Stocks'};
         if (euroPart == 0.5)
-            return {color: '#b7ffa2', text: '50%  en actions'};
+            return {color: '#b7ffa2', text: '50%  Stocks'};
         if (euroPart == 0.3)
-            return {color: '#97ff88', text: '70% en actions'};
+            return {color: '#97ff88', text: '70% Stocks'};
         if (euroPart == 0.0)
-            return {color: '#70ff69', text: '100% en actions '};
+            return {color: '#70ff69', text: '100% Stocks '};
         ;
 
     }
@@ -48,19 +48,20 @@ $(document).ready(function () {
     }
 
     function end() {
-        var html = "Sur une période de 8 ans (" + new Date(startDate).toLocaleDateString() + "-" + new Date(currentDate).toLocaleDateString() + ")<br />";
+        var html = "This was the actual market performance during this period : " + new Date(startDate).toLocaleDateString() + "-" + new Date(currentDate).toLocaleDateString() + "<br />";
         var perfIndex = Math.round(100 * (msci - 10000) / 10000);
         var perfCap = Math.round(100 * (capital - 10000) / 10000);
         if (capital == msci) {
-            html += "Vous avez une performance identique à l'index MSCI";
+            html += "Your strategy has identical performance to the MSCI";
         }
         if (capital > msci) {
             surperf = perfCap - perfIndex;
-            html += "Vous avez battu l'index de " + surperf + " % !";
+            html += "Awesome! you beat the market by " + surperf + "% !";
+            html += "<br />Now see if you can beat it more than 5 times out of 10"
         }
         if (capital < msci) {
             surperf = perfIndex - perfCap
-            html += "Vous avez été battu par l'index qui fait " + surperf + " % de mieux que vous";
+            html += "You were beaten by the market  by " + surperf + "% :(";
         }
         $("#result").html(html);
 
@@ -79,7 +80,7 @@ $(document).ready(function () {
                 }
             },
             title: {
-                text: 'Performances des différents profils'
+                text: 'Different allocation performances'
             },
             xAxis: {
                 type: 'datetime', labels: {
@@ -115,12 +116,12 @@ $(document).ready(function () {
                 enabled: true
             },
             series: [
-                {name: '0% actions', data: results[0]},
-                {name: '20% actions', data: results[1]},
-                {name: '50% actions', data: results[2]},
-                {name: '70% actions', data: results[3]},
-                {name: '100% actions', data: results[4]},
-                {name : 'Votre allocation', data:results[5]}
+                {name: '0% stocks', data: results[0]},
+                {name: '20% stocks', data: results[1]},
+                {name: '50% stocks', data: results[2]},
+                {name: '70% stocks', data: results[3]},
+                {name: '100% stocks', data: results[4]},
+                {name : 'Your allocation', data:results[5]}
             ]   
         });
         
@@ -238,7 +239,7 @@ $(document).ready(function () {
             text: 'MSCI World'
         },
         xAxis: {
-            title :{text: 'Nombre de mois écoulés'},
+            title :{text: 'Months elapsed'},
             type: 'datetime', labels: {
                 enabled : true,
                 formatter : function(value){
