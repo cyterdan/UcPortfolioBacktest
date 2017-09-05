@@ -80,7 +80,6 @@ $(document).ready(function () {
                 }
             },
             title: {
-                text: 'Different allocation performances'
             },
             xAxis: {
                 type: 'datetime', labels: {
@@ -116,12 +115,7 @@ $(document).ready(function () {
                 enabled: true
             },
             series: [
-                {name: '0% stocks', data: results[0]},
-                {name: '20% stocks', data: results[1]},
-                {name: '50% stocks', data: results[2]},
-                {name: '70% stocks', data: results[3]},
-                {name: '100% stocks', data: results[4]},
-                {name : 'Your allocation', data:results[5]}
+                text: 'Different allocation performances'
             ]   
         });
         
@@ -239,7 +233,12 @@ $(document).ready(function () {
             text: 'MSCI World'
         },
         xAxis: {
-            title :{text: 'Months elapsed'},
+                {name: '0% stocks', data: results[0]},
+                {name: '20% stocks', data: results[1]},
+                {name: '50% stocks', data: results[2]},
+                {name: '70% stocks', data: results[3]},
+                {name: '100% stocks', data: results[4]},
+                {name : 'Your allocation', data:results[5]}
             type: 'datetime', labels: {
                 enabled : true,
                 formatter : function(value){
@@ -293,3 +292,4 @@ $(document).ready(function () {
 
 
 });
+            title :{text: 'Months elapsed'},
