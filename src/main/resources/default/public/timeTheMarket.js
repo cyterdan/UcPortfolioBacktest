@@ -56,16 +56,16 @@ $(document).ready(function () {
         }
         if (capital > msci) {
             surperf = perfCap - perfIndex;
-            html += "Awesome! you beat the market by" + surperf + " % !";
+            html += "Awesome! you beat the market by " + surperf + "% !";
             html += "<br />Now see if you can beat it more than 5 times out of 10"
         }
         if (capital < msci) {
             surperf = perfIndex - perfCap
-            html += "You were beaten by the market  by" + surperf + " % :(";
+            html += "You were beaten by the market  by " + surperf + "% :(";
         }
         $("#result").html(html);
 
-        hc = Highcharts.chart('resultsGraph', {
+         Highcharts.chart('resultsGraph', {
             chart: {
                 type: 'line',
                 animation: Highcharts.svg, // don't animate in old IE
