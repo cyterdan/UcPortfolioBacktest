@@ -7,5 +7,6 @@ app:
   menu:
     Assurance Vie: /portfolio
     Market Timing Game : /timeTheMarket
+    Source code : https://github.com/cyterdan/UcPortfolioBacktest
 
  
