@@ -20,7 +20,6 @@ import cyterdan.backtest.core.model.HistoricalData;
 import cyterdan.backtest.core.model.Portfolio;
 import cyterdan.backtest.core.model.allocation.AllocationRebalanceMode;
 import cyterdan.backtest.core.model.allocation.FixedAllocation;
-import org.apache.commons.lang3.StringUtils;
 import org.rapidoid.job.Jobs;
 import org.rapidoid.util.Msc;
 
