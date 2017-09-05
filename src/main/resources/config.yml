@@ -7,7 +7,5 @@ app:
   menu:
     Assurance Vie: /portfolio
     Market Timing Game : /timeTheMarket
-    Doc:
-      To do...: /help
 
  

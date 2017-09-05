@@ -65,7 +65,7 @@ $(document).ready(function () {
         }
         $("#result").html(html);
 
-        hc = Highcharts.chart('resultsGraph', {
+         Highcharts.chart('resultsGraph', {
             chart: {
                 type: 'line',
                 animation: Highcharts.svg, // don't animate in old IE
