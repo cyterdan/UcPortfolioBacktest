@@ -48,7 +48,7 @@ $(document).ready(function () {
     }
 
     function end() {
-        var html = "This was the actual market performance during this period : " + new Date(startDate).toLocaleDateString() + "-" + new Date(currentDate).toLocaleDateString() + "<br />";
+        var html = "You played on this period : " + new Date(startDate).toLocaleDateString() + "-" + new Date(currentDate).toLocaleDateString() + "<br />";
         var perfIndex = Math.round(100 * (msci - 10000) / 10000);
         var perfCap = Math.round(100 * (capital - 10000) / 10000);
         if (capital == msci) {
@@ -56,16 +56,16 @@ $(document).ready(function () {
         }
         if (capital > msci) {
             surperf = perfCap - perfIndex;
-            html += "Awesome! you beat the market by " + surperf + "% !";
+            html += "Awesome! you beat the market by" + surperf + " % !";
             html += "<br />Now see if you can beat it more than 5 times out of 10"
         }
         if (capital < msci) {
             surperf = perfIndex - perfCap
-            html += "You were beaten by the market  by " + surperf + "% :(";
+            html += "You were beaten by the market  by" + surperf + " % :(";
         }
         $("#result").html(html);
 
-         Highcharts.chart('resultsGraph', {
+        hc = Highcharts.chart('resultsGraph', {
             chart: {
                 type: 'line',
                 animation: Highcharts.svg, // don't animate in old IE
@@ -80,6 +80,7 @@ $(document).ready(function () {
                 }
             },
             title: {
+                text: 'Different allocation performances'
             },
             xAxis: {
                 type: 'datetime', labels: {
@@ -115,7 +116,12 @@ $(document).ready(function () {
                 enabled: true
             },
             series: [
-                text: 'Different allocation performances'
+                {name: '0% actions', data: results[0]},
+                {name: '20% actions', data: results[1]},
+                {name: '50% actions', data: results[2]},
+                {name: '70% actions', data: results[3]},
+                {name: '100% actions', data: results[4]},
+                {name : 'Votre allocation', data:results[5]}
             ]   
         });
         
@@ -233,12 +239,7 @@ $(document).ready(function () {
             text: 'MSCI World'
         },
         xAxis: {
-                {name: '0% stocks', data: results[0]},
-                {name: '20% stocks', data: results[1]},
-                {name: '50% stocks', data: results[2]},
-                {name: '70% stocks', data: results[3]},
-                {name: '100% stocks', data: results[4]},
-                {name : 'Your allocation', data:results[5]}
+            title :{text: 'Nombre de mois écoulés'},
             type: 'datetime', labels: {
                 enabled : true,
                 formatter : function(value){
@@ -292,4 +293,3 @@ $(document).ready(function () {
 
 
 });
-            title :{text: 'Months elapsed'},
