@@ -12,15 +12,15 @@ $(document).ready(function () {
 
     function getVisualForValue(euroPart) {
         if (euroPart == 1.0)
-            return {color: '#edffd0', text: '0% Stocks'};
+            return {color: '#edffd0', text: '0% invested'};
         if (euroPart == 0.8)
-            return {color: '#d3ffba', text: '20% Stocks'};
+            return {color: '#d3ffba', text: '20% invested'};
         if (euroPart == 0.5)
-            return {color: '#b7ffa2', text: '50%  Stocks'};
+            return {color: '#b7ffa2', text: '50%  invested'};
         if (euroPart == 0.3)
-            return {color: '#97ff88', text: '70% Stocks'};
+            return {color: '#97ff88', text: '70% invested'};
         if (euroPart == 0.0)
-            return {color: '#70ff69', text: '100% Stocks '};
+            return {color: '#70ff69', text: '100% invested '};
         ;
 
     }
@@ -116,12 +116,12 @@ $(document).ready(function () {
                 enabled: true
             },
             series: [
-                {name: '0% actions', data: results[0]},
-                {name: '20% actions', data: results[1]},
-                {name: '50% actions', data: results[2]},
-                {name: '70% actions', data: results[3]},
-                {name: '100% actions', data: results[4]},
-                {name : 'Votre allocation', data:results[5]}
+                {name: '0% invested', data: results[0]},
+                {name: '20% invested', data: results[1]},
+                {name: '50% invested', data: results[2]},
+                {name: '70% invested', data: results[3]},
+                {name: '100% invested', data: results[4]},
+                {name : 'Your allocation', data:results[5]}
             ]   
         });
         
@@ -239,7 +239,7 @@ $(document).ready(function () {
             text: 'MSCI World'
         },
         xAxis: {
-            title :{text: 'Nombre de mois écoulés'},
+            title :{text: 'Months elapsed'},
             type: 'datetime', labels: {
                 enabled : true,
                 formatter : function(value){

@@ -207,17 +207,17 @@ $(document).ready(function () {
                         if (this.value == 2.0)
                             return 'Livret A';
                         if (this.value == 4.0)
-                            return 'Obligation';
+                            return 'Bonds';
                         if (this.value == 5.0)
-                            return 'Or';
+                            return 'Gold';
                         if (this.value == 6)
                             return 'SCPI';
                         if (this.value == 9)
-                            return 'Logements';
+                            return 'Housing';
                         if (this.value == 10)
-                            return 'Actions';
+                            return 'Stocks';
                         if (this.value == 14)
-                            return 'Foncières';
+                            return 'REITS';
                         return '';
                     },
                     style: {
@@ -226,7 +226,7 @@ $(document).ready(function () {
                     }
                 },
                 title: {
-                    text: 'Performance annuelle <br/> moyenne(%)'
+                    text: 'Average return <br/>(%)'
                 },
                 plotBands: [{
                         from: 0.0,
@@ -243,7 +243,7 @@ $(document).ready(function () {
                     }]
             },
             series: [{
-                    name: 'Performance hebdomadaire',
+                    name: 'Returns',
                     data: [parseFloat(perf.toFixed(2))],
                     tooltip: {
                         valueSuffix: '%'
